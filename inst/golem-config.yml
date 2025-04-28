@@ -1,0 +1,12 @@
+default:
+  golem_name: fioRa
+  golem_version: 0.0.0.9000
+  app_version: !expr as.character(utils::packageVersion("fioRa"))
+  app_date: !expr as.character(utils::packageDate("fioRa"))
+  app_prod: no
+production:
+  app_prod: yes
+dev:
+  golem_wd: !expr golem::pkg_path()
+  app_version: development
+  app_date: !expr as.character(Sys.Date())
