@@ -1,6 +1,6 @@
 Package: fioRa
 Title: Mass-Spectra Prediction Using the fiora Model
-Version: 0.0.0.9000
+Version: 0.1.1
 Date: 2025-04-25
 Authors@R: 
     person("Jan", "Lisec", , "jan.lisec@bam.de", role = c("aut", "cre"))
@@ -10,6 +10,8 @@ Imports:
     bslib,
     config,
     golem,
+    InterpretMSSpectrum,
+    rcdk,
     reticulate,
     shiny,
     shinyjs,

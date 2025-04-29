@@ -3,7 +3,20 @@
 #' @description A shiny Module.
 #'
 #' @param id,input,output,session Internal parameters for {shiny}.
-#'
+#' @examples
+#' if (interactive()) {
+#'   shiny::shinyApp(
+#'     ui = bslib::page_fluid(
+#'       shinyjs::useShinyjs(),
+#'       waiter::useWaiter(),
+#'       fioRa:::page_fioRa_ui(id = "test")
+#'     ),
+#'     server = function(input, output, session) {
+#'       fioRa:::page_fioRa_server(id = "test")
+#'     }
+#'   )
+#' }
+#' @keywords internal
 #' @noRd
 page_fioRa_ui <- function(id) {
   ns <- shiny::NS(id)
@@ -52,7 +65,7 @@ page_fioRa_ui <- function(id) {
 }
 
 #' page_fioRa Server Functions
-#'
+#' @keywords internal
 #' @noRd
 page_fioRa_server <- function(id){
   moduleServer(id, function(input, output, session){
@@ -60,7 +73,7 @@ page_fioRa_server <- function(id){
     # # ensure that reticulate is set up and that fiora is installed
     # msg <- reticulate::py_require("git+https://github.com/BAMeScience/fiora.git")
 
-    waiter::waiter_show(html = tagList(waiter::spin_fading_circles(), "fioRa is still loading..."))
+    waiter::waiter_show(html = tagList(waiter::spin_fading_circles(), "fioRa is still loading (might take 3-4 minutes)..."))
 
     # get location of fiora-predict script
     fiora_script <- list.files(path=reticulate::py_config()$virtualenv, pattern="^fiora-predict$", recursive = TRUE, full.names = TRUE)
@@ -118,7 +131,7 @@ page_fioRa_server <- function(id){
     }, ignoreInit = TRUE)
 
     output$btn_download_msp <- shiny::downloadHandler(
-      filename = function() { "fioRa_result.txt" },
+      filename = function() { "fioRa_result.mgf" },
       content = function(file) { file.copy(from = temp_output_file, to = file, overwrite = TRUE) }
     )
 
@@ -134,11 +147,11 @@ page_fioRa_server <- function(id){
       n <- input$digits
       if (n>=0) {
         flt <- y > 0.05*max(y, na.rm=T) & y < 0.9*max(y, na.rm=T)
-        #text(x = x[flt], y = y[flt], labels=round(x[flt],n), pos=3, col=4, srt=90)
-        text(x = x[flt], y = y[flt], labels=round(x[flt],n), pos=3, col=4)
+        #graphics::text(x = x[flt], y = y[flt], labels=round(x[flt],n), pos=3, col=4, srt=90)
+        graphics::text(x = x[flt], y = y[flt], labels=round(x[flt],n), pos=3, col=4)
         flt <- y > 0.9*max(y, na.rm=T)
-        #text(x = x[flt], y = y[flt], labels=round(x[flt],n), pos=1, col=4, srt=90)
-        text(x = x[flt], y = y[flt], labels=round(x[flt],n), pos=1, col=4)
+        #graphics::text(x = x[flt], y = y[flt], labels=round(x[flt],n), pos=1, col=4, srt=90)
+        graphics::text(x = x[flt], y = y[flt], labels=round(x[flt],n), pos=1, col=4)
       }
     })
 
@@ -168,9 +181,3 @@ page_fioRa_server <- function(id){
 
   })
 }
-
-## To be copied in the UI
-# mod_page_fioRa_ui("page_fioRa_1")
-
-## To be copied in the server
-# mod_page_fioRa_server("page_fioRa_1")

@@ -1,9 +1,9 @@
-#' Run the Shiny Application
-#'
+#' @title Run the Shiny Application.
+#' @description Will open a Shiny App in the local browser.
 #' @param ... arguments to pass to golem_opts.
 #' See `?golem::get_golem_options` for more details.
 #' @inheritParams shiny::shinyApp
-#'
+#' @return A shinyApp object. Will open a Shiny App in the local browser.
 #' @export
 run_app <- function(
   onStart = NULL,

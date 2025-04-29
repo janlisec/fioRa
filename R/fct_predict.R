@@ -1,12 +1,23 @@
-#' predict
+#' @title Predict MS^2 fragment spectra from SMILES code.
 #'
 #' @param Name The compound name.
 #' @param SMILES The SMILES code of the compound.
-#' @param Precursor_type Precursor type.
+#' @param Precursor_type Precursor type (currently "[M-H]-" or "[M+H]+").
 #' @param CE Collision energy.
 #' @param Instrument_type Instrument type.
 #'
-#' @description A wrapper around the python fiora model.
+#' @description A wrapper around the python script `fiora-predict` using the
+#'     fiora open source model to generate a MS^2 spectra for a compound with
+#'     known SMILES code.
+#'
+#' @details
+#' This wrapper will generate a fiora ready input file (csv-format) based on the
+#'     user parameters which is stored as a temp file. It will ensure that the
+#'     current version of the fiora package is installed in a respective python
+#'     environment. It will use `system2()` to run the python script
+#'     `fiora-predict` and import its result back into R using the internal
+#'     function `read_fiora()`.
+#'
 #' @return A list with the fiora results for the specified compound.
 #' @examples
 #' predict()

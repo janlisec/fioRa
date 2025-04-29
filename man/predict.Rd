@@ -2,14 +2,16 @@
 % Please edit documentation in R/fct_predict.R
 \name{predict}
 \alias{predict}
-\title{predict}
+\title{Predict MS^2 fragment spectra from SMILES code.}
 \usage{
 predict(
   Name = "Example_0",
   SMILES = "CC1=CC(=O)OC2=CC(OS(O)(=O)=O)=CC=C12",
   Precursor_type = "[M-H]-",
   CE = 17,
-  Instrument_type = "HCD"
+  Instrument_type = "HCD",
+  min_prob = 0.001,
+  annotation = FALSE
 )
 }
 \arguments{
@@ -17,19 +19,36 @@ predict(
 
 \item{SMILES}{The SMILES code of the compound.}
 
-\item{Precursor_type}{Precursor type.}
+\item{Precursor_type}{Precursor type (currently "[M-H]-" or "[M+H]+").}
 
 \item{CE}{Collision energy.}
 
 \item{Instrument_type}{Instrument type.}
+
+\item{min_prob}{Minimum peak probability to be recorded in the spectrum.}
+
+\item{annotation}{Return SMILES for fragments if TRUE.}
 }
 \value{
 A list with the fiora results for the specified compound.
 }
 \description{
-A wrapper around the python fiora model.
+A wrapper around the python script `fiora-predict` using the
+    fiora open source model to generate a MS^2 spectra for a compound with
+    known SMILES code.
+}
+\details{
+This wrapper will generate a fiora ready input file (csv-format) based on the
+    user parameters which is stored as a temp file. It will ensure that the
+    current version of the fiora package is installed in a respective python
+    environment. It will use `system2()` to run the python script
+    `fiora-predict` and import its result back into R using the internal
+    function `read_fiora()`.
 }
 \examples{
-predict()
+\dontrun{
+  predict()
+  foo <- predict(annotation = TRUE, min_prob=0.01)
+}
 
 }

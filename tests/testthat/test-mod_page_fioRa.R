@@ -1,16 +1,15 @@
-testServer(
-  page_fioRa_server,
+shiny::testServer(
+  fioRa:::page_fioRa_server,
   # Add here your module params
-  args = list()
-  , {
+  args = list(), {
     ns <- session$ns
-    expect_true(
+    testthat::expect_true(
       inherits(ns, "function")
     )
-    expect_true(
+    testthat::expect_true(
       grepl(id, ns(""))
     )
-    expect_true(
+    testthat::expect_true(
       grepl("test", ns("test"))
     )
     # Here are some examples of tests you can
@@ -24,15 +23,16 @@ testServer(
     # expect_true(r$x == 1)
     # - Testing output
     # expect_true(inherits(output$tbl$html, "html"))
-})
+  }
+)
 
-test_that("module ui works", {
-  ui <- page_fioRa_ui(id = "test")
+testthat::test_that("module ui works", {
+  ui <- fioRa:::page_fioRa_ui(id = "test")
   golem::expect_shinytaglist(ui)
   # Check that formals have not been removed
-  fmls <- formals(page_fioRa_ui)
+  fmls <- formals(fioRa:::page_fioRa_ui)
   for (i in c("id")){
-    expect_true(i %in% names(fmls))
+    testthat::expect_true(i %in% names(fmls))
   }
 })
 

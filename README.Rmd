@@ -22,27 +22,28 @@ output: github_document
 
 You can install the development version of `{fioRa}` like so:
 
-```{r}
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
+```{r, eval = FALSE}
+install.packages("devtools")
+devtools::install_github("janlisec/fioRa")
 ```
 
 ## Run
 
-You can launch the application by running:
+You can launch the application as a Shiny-App by running:
 
 ```{r, eval = FALSE}
 fioRa::run_app()
 ```
 
+or use the exported function `predict` to work in R directly:
+
+```{r, eval = FALSE}
+fioRa::predict()
+```
+
 ## About
 
-You are reading the doc about version : `r golem::pkg_version()`
-
-This README has been compiled on the
-
-```{r}
-Sys.time()
-```
+You are reading the doc about version `r golem::pkg_version()` compiled on `r Sys.time() `.
 
 Here are the tests results and package coverage:
 

@@ -3,6 +3,7 @@
 ^data-raw$
 dev_history.R
 ^dev$
+^rsconnect$
 $run_dev.*
 ^.here$
 ^LICENSE\.md$
