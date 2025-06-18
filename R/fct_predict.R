@@ -27,6 +27,7 @@
 #' }#'
 #' @export
 predict <- function(Name = "Example_0", SMILES = "CC1=CC(=O)OC2=CC(OS(O)(=O)=O)=CC=C12", Precursor_type = "[M-H]-", CE = 17, Instrument_type = "HCD", min_prob = 0.001, annotation = FALSE) {
+  check_fiora_python_installation()
   temp_input_file <- tempfile(fileext = ".csv")
   temp_output_file <- gsub("csv$", "mgf", temp_input_file)
   tmp_data <- c("Name,SMILES,Precursor_type,CE,Instrument_type", paste(c(Name,SMILES,Precursor_type,CE,Instrument_type), collapse=","))

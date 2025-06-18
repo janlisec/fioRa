@@ -175,17 +175,18 @@ check_fiora_python_installation <- function(silent = TRUE) {
 
   if (is_shinyapps()) {
     # Auf shinyapps.io: virtuelle Umgebung mit py_require()
+    if (!silent) message("Installing a virtual python environment and 'fiora' on shinyapps.io.")
     reticulate::py_require("git+https://github.com/BAMeScience/fiora.git")
   } else {
     # Lokal: Conda-Umgebung erstellen und aktivieren
     if (!tryCatch(file.exists(reticulate::conda_binary()), error = function(e) FALSE)) {
       reticulate::install_miniconda(path = reticulate::miniconda_path(), update = FALSE, force = FALSE)
     }
-    if (reticulate::condaenv_exists(envname = "fiora", conda = "auto")) {
+    if (dir.exists(file.path(reticulate::miniconda_path(), "envs", "fiora"))) {
       if (!silent) message("A python conda environment named 'fiora' was found and will be used.")
     } else {
       if (!silent) message("A python conda environment named 'fiora' will be installed...")
-      if (!("fiora" %in% reticulate::conda_list()$name)) reticulate::conda_create("fiora")
+      reticulate::conda_create("fiora")
       reticulate::conda_install(envname = "fiora", packages = "git+https://github.com/BAMeScience/fiora.git", pip = TRUE, channel = "defaults")
     }
     reticulate::use_condaenv(condaenv = "fiora", conda = "auto", required = NULL)
