@@ -32,12 +32,7 @@ predict <- function(Name = "Example_0", SMILES = "CC1=CC(=O)OC2=CC(OS(O)(=O)=O)=
   tmp_data <- c("Name,SMILES,Precursor_type,CE,Instrument_type", paste(c(Name,SMILES,Precursor_type,CE,Instrument_type), collapse=","))
   cat(tmp_data, file = temp_input_file, append = FALSE, sep = "\n")
 
-  # old version using py_require()
-  #reticulate::py_require("git+https://github.com/BAMeScience/fiora.git")
-  #fiora_script <- list.files(path=reticulate::py_config()$virtualenv, pattern="^fiora-predict$", recursive = TRUE, full.names = TRUE)
-  #command <- reticulate::py_config()$python
-
-  # new version using conda environment
+  # get path of python.exe and fiora_predict script
   command <- reticulate::py_config()$python
   fiora_script <- list.files(path=reticulate::py_config()$pythonhome, pattern="^fiora-predict$", recursive = TRUE, full.names = TRUE)
 

@@ -71,12 +71,8 @@ page_fioRa_server <- function(id){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
     # # ensure that reticulate is set up and that fiora is installed
-    # msg <- reticulate::py_require("git+https://github.com/BAMeScience/fiora.git")
-
     waiter::waiter_show(html = tagList(waiter::spin_fading_circles(), "fioRa is still loading (might take 3-4 minutes)..."))
-
     # get location of fiora-predict script
-    #fiora_script <- list.files(path=reticulate::py_config()$virtualenv, pattern="^fiora-predict$", recursive = TRUE, full.names = TRUE)
     fiora_script <- list.files(path=reticulate::py_config()$pythonhome, pattern="^fiora-predict$", recursive = TRUE, full.names = TRUE)
     if (!file.exists(fiora_script)) message("Could not detect script 'fiora-predict'") else { message("fiora_script: ", fiora_script) }
 
