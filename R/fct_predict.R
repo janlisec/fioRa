@@ -30,16 +30,21 @@ predict <- function(Name = "Example_0", SMILES = "CC1=CC(=O)OC2=CC(OS(O)(=O)=O)=
   temp_input_file <- tempfile(fileext = ".csv")
   temp_output_file <- gsub("csv$", "mgf", temp_input_file)
   tmp_data <- c("Name,SMILES,Precursor_type,CE,Instrument_type", paste(c(Name,SMILES,Precursor_type,CE,Instrument_type), collapse=","))
-  reticulate::py_require("git+https://github.com/BAMeScience/fiora.git")
   cat(tmp_data, file = temp_input_file, append = FALSE, sep = "\n")
-  fiora_script <- list.files(path=reticulate::py_config()$virtualenv, pattern="^fiora-predict$", recursive = TRUE, full.names = TRUE)
+
+  # old version using py_require()
+  #reticulate::py_require("git+https://github.com/BAMeScience/fiora.git")
+  #fiora_script <- list.files(path=reticulate::py_config()$virtualenv, pattern="^fiora-predict$", recursive = TRUE, full.names = TRUE)
+  #command <- reticulate::py_config()$python
+
+  # new version using conda environment
   command <- reticulate::py_config()$python
+  fiora_script <- list.files(path=reticulate::py_config()$pythonhome, pattern="^fiora-predict$", recursive = TRUE, full.names = TRUE)
+
   args <- c(fiora_script, paste0('-i \"', temp_input_file, '\"'), paste0('-o \"', temp_output_file, '\"'))
   if (annotation) args <- c(args, "--annotation")
   if (is.numeric(min_prob)) args <- c(args, paste0('--min_prob ', min_prob))
   msg <- system2(command = command, args = args)
-  #browser()
-  #readLines(temp_output_file)
   if (msg==0) read_fiora(fl = temp_output_file) else msg
 }
 

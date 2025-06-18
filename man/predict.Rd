@@ -38,17 +38,16 @@ A wrapper around the python script `fiora-predict` using the
     known SMILES code.
 }
 \details{
-This wrapper will generate a fiora ready input file (csv-format) based on the
-    user parameters which is stored as a temp file. It will ensure that the
-    current version of the fiora package is installed in a respective python
-    environment. It will use `system2()` to run the python script
-    `fiora-predict` and import its result back into R using the internal
-    function `read_fiora()`.
+This wrapper will generate a fiora ready input file (csv-format)
+    based on the user parameters which is stored as a temp file. It will
+    ensure that the current version of the fiora package is installed in a
+    respective python environment. It will use `system2()` to run the python
+    script `fiora-predict` and import its result back into R using the
+    internal function `read_fiora()`.
 }
 \examples{
 \dontrun{
   predict()
   foo <- predict(annotation = TRUE, min_prob=0.01)
-}
-
+}#'
 }

@@ -157,3 +157,20 @@ square_subplot_coord <- function(x, y, w = 0.2) {
   # Rückgabe der Koordinaten des Subplots
   return(c(x_start, y_start, x_end, y_end))
 }
+
+#' @title Determine python and firo installation status.
+#' @param silent TRUE.
+#' @return Returns NULL.
+#' @noRd
+#' @keywords internal
+check_fiora_python_installation <- function(silent = TRUE) {
+  if (reticulate::condaenv_exists(envname = "fiora", conda = "auto")) {
+    if (!silent) message("A python conda environment named 'fiora' was found and will be used.")
+  } else {
+    if (!silent) message("A python conda environment named 'fiora' will be installed...")
+    reticulate::conda_create("fiora")
+    reticulate::conda_install(envname = "fiora", packages = "git+https://github.com/BAMeScience/fiora.git", pip = TRUE, channel = "defaults")
+  }
+  reticulate::use_condaenv(condaenv = "fiora", conda = "auto", required = NULL)
+  invisible(NULL)
+}

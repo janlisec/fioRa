@@ -1,3 +1,7 @@
+# v0.2.1 by jan.lisec@bam.de
+
+* modified fiora installation using a conda environment
+
 # v0.1.1 by jan.lisec@bam.de
 
 * Shiny App working on shinyapps.io
