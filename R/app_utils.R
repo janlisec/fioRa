@@ -164,6 +164,9 @@ square_subplot_coord <- function(x, y, w = 0.2) {
 #' @noRd
 #' @keywords internal
 check_fiora_python_installation <- function(silent = TRUE) {
+  if (!tryCatch(file.exists(reticulate::conda_binary()), error = function(e) FALSE)) {
+    reticulate::install_miniconda(path = reticulate::miniconda_path(), update = FALSE, force = FALSE)
+  }
   if (reticulate::condaenv_exists(envname = "fiora", conda = "auto")) {
     if (!silent) message("A python conda environment named 'fiora' was found and will be used.")
   } else {

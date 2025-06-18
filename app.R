@@ -4,7 +4,7 @@
 # To update renv:
 # renv::update()
 # renv::snapshot()
-# renv::install("janlisec/eCerto")
+# renv::install("janlisec/fioRa")
 
 # To deploy to shinyapps.io:
 # rsconnect::deployApp(appDir = "C:/Users/jlisec/Documents/Rpackages/Rpackage_fioRa/fioRa", appName = "fioraApp", forceUpdate = TRUE)
