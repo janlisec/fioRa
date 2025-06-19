@@ -158,38 +158,76 @@ square_subplot_coord <- function(x, y, w = 0.2) {
   return(c(x_start, y_start, x_end, y_end))
 }
 
-#' @title Determine if fioRa runs on shinyapps.io.
-#' @return Returns TRUE/FALSE.
-#' @noRd
-#' @keywords internal
-is_shinyapps <- function() {
-  grepl("shinyapps.io", Sys.getenv("SHINYAPPS_HOSTNAME")) || !is.na(Sys.getenv("SHINYAPPS_API_KEY", unset = NA))
-}
-
 #' @title Determine python and fiora installation status.
 #' @param silent TRUE.
 #' @return Returns NULL.
 #' @noRd
 #' @keywords internal
-check_fiora_python_installation <- function(silent = TRUE) {
-
-  if (is_shinyapps()) {
-    # Auf shinyapps.io: virtuelle Umgebung mit py_require()
-    if (!silent) message("Installing a virtual python environment and 'fiora' on shinyapps.io.")
-    reticulate::py_require("git+https://github.com/BAMeScience/fiora.git")
+check_fiora_python_installation <- function(silent = FALSE) {
+  # default location on BAM Server
+  command <- "/home/shiny_test/miniforge3/envs/fiora/bin/python.exe"
+  if (file.exists(command)) {
+    message("BAM Server. Python path: ", command)
   } else {
-    # Lokal: Conda-Umgebung erstellen und aktivieren
-    if (!tryCatch(file.exists(reticulate::conda_binary()), error = function(e) FALSE)) {
-      reticulate::install_miniconda(path = reticulate::miniconda_path(), update = FALSE, force = FALSE)
-    }
-    if (dir.exists(file.path(reticulate::miniconda_path(), "envs", "fiora"))) {
-      if (!silent) message("A python conda environment named 'fiora' was found and will be used.")
+    verify_suggested("reticulate")
+    if (isTRUE(getOption("fiora.deploy_to_shinyapps", FALSE))) {
+      # Auf shinyapps.io: virtuelle Umgebung mit py_require()
+      if (!silent) message("Installing a virtual python environment and 'fiora' on shinyapps.io.")
+      reticulate::py_require("git+https://github.com/BAMeScience/fiora.git")
     } else {
-      if (!silent) message("A python conda environment named 'fiora' will be installed...")
-      reticulate::conda_create("fiora")
-      reticulate::conda_install(envname = "fiora", packages = "git+https://github.com/BAMeScience/fiora.git", pip = TRUE, channel = "defaults")
+      # Lokal: Conda-Umgebung erstellen und aktivieren
+      if (!tryCatch(file.exists(reticulate::conda_binary()), error = function(e) FALSE)) {
+        reticulate::install_miniconda(path = reticulate::miniconda_path(), update = FALSE, force = FALSE)
+      }
+      if (dir.exists(file.path(reticulate::miniconda_path(), "envs", "fiora"))) {
+        if (!silent) message("A python conda environment named 'fiora' was found and will be used.")
+      } else {
+        if (!silent) message("A python conda environment named 'fiora' will be installed...")
+        reticulate::conda_create("fiora")
+        reticulate::conda_install(envname = "fiora", packages = "git+https://github.com/BAMeScience/fiora.git", pip = TRUE, channel = "defaults")
+      }
+      reticulate::use_condaenv(condaenv = "fiora", conda = "auto", required = NULL)
     }
-    reticulate::use_condaenv(condaenv = "fiora", conda = "auto", required = NULL)
+    command <- reticulate::py_config()$python
+  }
+  invisible(command)
+}
+
+check_fiora_scipt <- function(fiora_script = NULL) {
+  if (is.null(fiora_script)) {
+    fiora_script <- "/home/shiny_test/miniforge3/envs/fiora/bin/fiora-predict"
+    if (file.exists(fiora_script)) {
+      # default location on BAM Server
+      message("BAM Server. Script path: ", fiora_script)
+    } else {
+      verify_suggested("reticulate")
+      fiora_script <- list.files(path=reticulate::py_config()$pythonhome, pattern="^fiora-predict$", recursive = TRUE, full.names = TRUE)
+    }
+  }
+  if (!file.exists(fiora_script)) {
+    message("The file specified in parameter 'fiora_script' (", fiora_script, ") does not exist")
+  } else {
+    message("Using file ", fiora_script, " as python script fiora-predict")
+  }
+  return(fiora_script)
+}
+
+#' @title verify_suggested.
+#' @description Check if packages are available and stop function otherwise.
+#' @param pkg Package names to be checked.
+#' @return NULL.
+#' @keywords internal
+#' @noRd
+verify_suggested <- function(pkg) {
+  # verify that suggested packages are available
+  check_pkg <- sapply(pkg, requireNamespace, quietly = TRUE)
+  if (!all(check_pkg)) {
+    msg <- paste0(
+      "The use of this function requires package", ifelse(sum(!check_pkg)>1, "s", ""),
+      paste(names(check_pkg)[!check_pkg], collapse=", "),
+      ". Please install."
+    )
+    stop(msg)
   }
   invisible(NULL)
 }

@@ -1,7 +1,7 @@
 Package: fioRa
 Title: Mass-Spectra Prediction Using the fiora Model
-Version: 0.2.1
-Date: 2025-06-18
+Version: 0.2.2
+Date: 2025-06-19
 Authors@R: 
     person("Jan", "Lisec", , "jan.lisec@bam.de", role = c("aut", "cre"))
 Description: Provides a wrapper for the python package `fiora` as well as a `Shiny`-App to facilitate data processing and visualization.
@@ -12,7 +12,6 @@ Imports:
     golem,
     InterpretMSSpectrum,
     rcdk,
-    reticulate,
     shiny,
     shinyjs,
     waiter
@@ -22,6 +21,7 @@ RoxygenNote: 7.3.2
 URL: https://github.com/janlisec/fioRa
 BugReports: https://github.com/janlisec/fioRa/issues
 Suggests: 
+    reticulate,
     spelling,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
