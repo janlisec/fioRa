@@ -1,6 +1,6 @@
 Package: fioRa
 Title: Mass-Spectra Prediction Using the fiora Model
-Version: 0.2.2
+Version: 0.2.3
 Date: 2025-06-19
 Authors@R: 
     person("Jan", "Lisec", , "jan.lisec@bam.de", role = c("aut", "cre"))
