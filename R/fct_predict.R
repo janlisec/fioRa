@@ -7,6 +7,7 @@
 #' @param Instrument_type Instrument type.
 #' @param min_prob Minimum peak probability to be recorded in the spectrum.
 #' @param annotation Return SMILES for fragments if TRUE.
+#' @param fiora_script Python script fiora-predict.
 #'
 #' @description A wrapper around the python script `fiora-predict` using the
 #'     fiora open source model to generate a MS^2 spectra for a compound with
@@ -26,21 +27,24 @@
 #'   foo <- predict(annotation = TRUE, min_prob=0.01)
 #' }#'
 #' @export
-predict <- function(Name = "Example_0", SMILES = "CC1=CC(=O)OC2=CC(OS(O)(=O)=O)=CC=C12", Precursor_type = "[M-H]-", CE = 17, Instrument_type = "HCD", min_prob = 0.001, annotation = FALSE) {
-  check_fiora_python_installation()
+predict <- function(Name = "Example_0", SMILES = "CC1=CC(=O)OC2=CC(OS(O)(=O)=O)=CC=C12", Precursor_type = "[M-H]-", CE = 17, Instrument_type = "HCD", min_prob = 0.001, annotation = FALSE, fiora_script = NULL) {
+  # get path of python.exe and fiora_predict script
+  command <- check_fiora_python_installation()
+  fiora_script <- check_fiora_scipt(fiora_script)
+
+  # get input/output files, write data
   temp_input_file <- tempfile(fileext = ".csv")
   temp_output_file <- gsub("csv$", "mgf", temp_input_file)
   tmp_data <- c("Name,SMILES,Precursor_type,CE,Instrument_type", paste(c(Name,SMILES,Precursor_type,CE,Instrument_type), collapse=","))
   cat(tmp_data, file = temp_input_file, append = FALSE, sep = "\n")
 
-  # get path of python.exe and fiora_predict script
-  command <- reticulate::py_config()$python
-  fiora_script <- list.files(path=reticulate::py_config()$pythonhome, pattern="^fiora-predict$", recursive = TRUE, full.names = TRUE)
-
+  # process with args
   args <- c(fiora_script, paste0('-i \"', temp_input_file, '\"'), paste0('-o \"', temp_output_file, '\"'))
   if (annotation) args <- c(args, "--annotation")
   if (is.numeric(min_prob)) args <- c(args, paste0('--min_prob ', min_prob))
   msg <- system2(command = command, args = args)
+
+  # read result
   if (msg==0) read_fiora(fl = temp_output_file) else msg
 }
 

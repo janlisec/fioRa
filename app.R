@@ -15,4 +15,8 @@
 
 pkgload::load_all(export_all = FALSE, helpers = FALSE, attach_testthat = FALSE)
 options("golem.app.prod" = TRUE)
+# this should be TRUE only for deployment to shinyapps.io
+#options(fiora.deploy_to_shinyapps = tryCatch(rsconnect::serverInfo(name = "shinyapps.io")$name, error = function(e) "")=="shinyapps.io")
+#options(fiora.deploy_to_shinyapps = TRUE)
+options(fiora.deploy_to_shinyapps = FALSE)
 run_app() # add parameters here (if any)

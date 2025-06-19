@@ -65,16 +65,16 @@ page_fioRa_ui <- function(id) {
 }
 
 #' page_fioRa Server Functions
+#' @param fiora_script Python script fiora-predict.
 #' @keywords internal
 #' @noRd
-page_fioRa_server <- function(id){
+page_fioRa_server <- function(id, fiora_script = NULL){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
     # # ensure that reticulate is set up and that fiora is installed
     waiter::waiter_show(html = tagList(waiter::spin_fading_circles(), "fioRa is still loading (might take 3-4 minutes)..."))
-    # get location of fiora-predict script
-    fiora_script <- list.files(path=reticulate::py_config()$pythonhome, pattern="^fiora-predict$", recursive = TRUE, full.names = TRUE)
-    if (!file.exists(fiora_script)) message("Could not detect script 'fiora-predict'") else { message("fiora_script: ", fiora_script) }
+    # get or check fiora-predict script
+    fiora_script <- check_fiora_scipt(fiora_script)
 
     # write test data to input file
     temp_input_file <- tempfile(fileext = ".csv")
@@ -110,7 +110,7 @@ page_fioRa_server <- function(id){
         cat(input$text_input, file = temp_input_file, append = FALSE)
 
         # establish system command and args and run script
-        command <- reticulate::py_config()$python
+        command <- check_fiora_python_installation()
         args <- c(fiora_script, paste0('-i \"', temp_input_file, '\"'), paste0('-o \"', temp_output_file, '\"'), "--annotation")
         msg <- system2(command = command, args = args)
         if (msg==0) rv$fiora_finished <- rv$fiora_finished+1

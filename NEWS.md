@@ -1,3 +1,7 @@
+# v0.2.2 by jan.lisec@bam.de
+
+* moved reticulate to Suggest in Description if python installation and script is found
+
 # v0.2.1 by jan.lisec@bam.de
 
 * modified fiora installation using a conda environment
