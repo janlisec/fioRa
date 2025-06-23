@@ -44,13 +44,12 @@ jobs:
         with:
           extra-packages:
             any::rcmdcheck
-            any::reticulate
           needs: check
 
-      - name: Install Python dependencies in r-miniconda
-        run: |
-        Rscript -e "reticulate::conda_create('fiora')"
-        Rscript -e "reticulate::conda_install('fiora', 'git+https://github.com/BAMeScience/fiora.git', pip = TRUE)"
+      # - name: Install Python dependencies in r-miniconda
+      #   run: |
+      #   Rscript -e "reticulate::conda_create('fiora')"
+      #   Rscript -e "reticulate::conda_install('fiora', 'git+https://github.com/BAMeScience/fiora.git', pip = TRUE)"
 
       - uses: r-lib/actions/check-r-package@v2
         with:
