@@ -1,6 +1,7 @@
 #' @title Calculate Molecular Formula from SMILES with rcdk.
 #' @description A small wrapper function to calculate the molecular formula
-#' from SMILES with the rcdk, as recommended. Note: current version does not handle labelling.
+#'     from SMILES with the rcdk, as recommended. Note: current version does
+#'     not handle labelling.
 #' @param smiles Valid SMILES code used to calculate the formula.
 #' @author Emma Schymanski <emma.schymanski@@uni.lu>
 #' @examples

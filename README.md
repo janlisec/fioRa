@@ -14,7 +14,7 @@ coverage](https://codecov.io/gh/janlisec/fioRa/graph/badge.svg)](https://app.cod
 Badge](https://img.shields.io/badge/doi-10.1038/s41467--025--57422--4-yellow.svg)](https://doi.org/10.1038/s41467-025-57422-4)
 <!-- badges: end -->
 
-**FIORA**is an in silico fragmentation algorithm designed to predict
+**FIORA** is an in silico fragmentation algorithm designed to predict
 tandem mass spectra (MS/MS) with high accuracy. Using a graph neural
 network, FIORA models bond cleavages, fragment intensities, and
 estimates retention times (RT) and collision cross sections (CCS).
@@ -60,7 +60,7 @@ if (!reticulate::virtualenv_exists("fiora")) {
 
 ## Run
 
-Now, you can launch the application as a Shiny-App by running:
+Now, you can launch the application as a Shiny-App.
 
 ``` r
 fioRa::run_app()
@@ -72,10 +72,11 @@ alt="fioRa screenshot" />
 <figcaption aria-hidden="true">fioRa screenshot</figcaption>
 </figure>
 
-or use the exported function `run_script()` to work in the R command
-line directly. This will accept R styled input parameters, generate an
-appropriate temporary **FIORA** input file, process it and return an R
-styled list including the predicted MS/MS spectrum.
+Alternatively you can use the exported function `run_script()` to work
+in the R command line directly. This will accept R styled input
+parameters, generate an appropriate temporary **FIORA** input file,
+process it and return an R styled list including the predicted MS/MS
+spectrum.
 
 ``` r
 fioRa::run_script(Name = "Example_0", SMILES = "CC1=CC(=O)OC2=CC(OS(O)(=O)=O)=CC=C12")
@@ -124,4 +125,4 @@ fioRa::run_script(Name = "Example_0", SMILES = "CC1=CC(=O)OC2=CC(OS(O)(=O)=O)=CC
 ## About
 
 You are reading the doc about version 0.2.4 compiled on 2025-06-23
-16:02:26.604624.
+16:07:54.876164.
