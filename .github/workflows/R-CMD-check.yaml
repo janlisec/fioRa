@@ -22,7 +22,7 @@ jobs:
           - {os: macos-latest,   r: 'release'}
           - {os: windows-latest, r: 'release'}
           #- {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
-          #- {os: ubuntu-latest,   r: 'release'}
+          - {os: ubuntu-latest,   r: 'release'}
           #- {os: ubuntu-latest,   r: 'oldrel-1'}
 
     env:
@@ -46,12 +46,20 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install Python dependencies
+      - name: Create and activate virtual environment and install Python dependencies
         run: |
-          python -m venv fiora
-          source fiora/bin/activate
-          pip install --upgrade pip
-          pip install git+https://github.com/BAMeScience/fiora.git
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            python -m venv fiora
+            .\\fiora\\Scripts\\activate
+            pip install --upgrade pip
+            pip install git+https://github.com/BAMeScience/fiora.git
+          elif [[ "$RUNNER_OS" == "macOS" || "$RUNNER_OS" == "Linux" ]]; then
+            python -m venv fiora
+            source fiora/bin/activate
+            pip install --upgrade pip
+            pip install git+https://github.com/BAMeScience/fiora.git
+          fi
+        shell: bash
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
