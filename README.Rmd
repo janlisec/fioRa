@@ -27,18 +27,38 @@ install.packages("devtools")
 devtools::install_github("janlisec/fioRa")
 ```
 
+Before first use you need to set up a python installation and a virtual 
+environment `fiora` which can be achieved from within R with the help of 
+the `reticulate` package by:
+
+```{r, eval = FALSE}
+# [1] install R package reticulate if you haven't done yet
+install.packages("reticulate")
+
+# [2] install python (miniconda) if you haven't done yet
+if (!file.exists(reticulate::miniconda_path())) {
+  reticulate::install_miniconda(path = reticulate::miniconda_path(), update = FALSE, force = FALSE)
+}
+
+# [3] install python module fiora in a virtual environment
+if (!reticulate::virtualenv_exists("fiora")) {
+  reticulate::virtualenv_create("fiora")
+  reticulate::virtualenva_install(envname = "fiora", packages = "git+https://github.com/BAMeScience/fiora.git")
+}
+```
+
 ## Run
 
-You can launch the application as a Shiny-App by running:
+Now, you can launch the application as a Shiny-App by running:
 
 ```{r, eval = FALSE}
 fioRa::run_app()
 ```
 
-or use the exported function `predict` to work in R directly:
+or use the exported function `run_script` to work in the R command line directly:
 
 ```{r, eval = FALSE}
-fioRa::predict()
+fioRa::run_script()
 ```
 
 ## About

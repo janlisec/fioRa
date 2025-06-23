@@ -23,14 +23,13 @@
 #' @return A list with the fiora results for the specified compound.
 #' @examples
 #' \dontrun{
-#'   predict()
-#'   foo <- predict(annotation = TRUE, min_prob=0.01)
+#'   run_script()
+#'   foo <- run_script(annotation = TRUE, min_prob=0.01)
 #' }#'
 #' @export
-predict <- function(Name = "Example_0", SMILES = "CC1=CC(=O)OC2=CC(OS(O)(=O)=O)=CC=C12", Precursor_type = "[M-H]-", CE = 17, Instrument_type = "HCD", min_prob = 0.001, annotation = FALSE, fiora_script = NULL) {
+run_script <- function(Name = "Example_0", SMILES = "CC1=CC(=O)OC2=CC(OS(O)(=O)=O)=CC=C12", Precursor_type = "[M-H]-", CE = 17, Instrument_type = "HCD", min_prob = 0.001, annotation = FALSE, fiora_script = NULL) {
   # get path of python.exe and fiora_predict script
-  command <- check_fiora_python_installation()
-  fiora_script <- check_fiora_scipt(fiora_script)
+  fioRa_pth <- find_fiora_predict_paths()
 
   # get input/output files, write data
   temp_input_file <- tempfile(fileext = ".csv")
@@ -38,11 +37,16 @@ predict <- function(Name = "Example_0", SMILES = "CC1=CC(=O)OC2=CC(OS(O)(=O)=O)=
   tmp_data <- c("Name,SMILES,Precursor_type,CE,Instrument_type", paste(c(Name,SMILES,Precursor_type,CE,Instrument_type), collapse=","))
   cat(tmp_data, file = temp_input_file, append = FALSE, sep = "\n")
 
-  # process with args
-  args <- c(fiora_script, paste0('-i \"', temp_input_file, '\"'), paste0('-o \"', temp_output_file, '\"'))
+  args <- c(paste0('-i \"', temp_input_file, '\"'), paste0('-o \"', temp_output_file, '\"'))
   if (annotation) args <- c(args, "--annotation")
   if (is.numeric(min_prob)) args <- c(args, paste0('--min_prob ', min_prob))
-  msg <- system2(command = command, args = args)
+
+  # process with args
+  if (fioRa_pth$os == "Windows") {
+    msg <- system2(command = fioRa_pth$python, args = c(fioRa_pth$script, args))
+  } else {
+    msg <- system2(command = fioRa_pth$script, args = args)
+  }
 
   # read result
   if (msg==0) read_fiora(fl = temp_output_file) else msg

@@ -133,7 +133,7 @@ square_subplot_coord <- function(x, y, w = 0.2) {
   subplot_size <- w * min(device_width, device_height)
 
   # Ermittlung der user coordinates
-  usr <- par("usr")
+  usr <- graphics::par("usr")
   x_range <- usr[2] - usr[1]
   y_range <- usr[4] - usr[3]
   x_len <- subplot_size * x_range / device_width
@@ -158,60 +158,6 @@ square_subplot_coord <- function(x, y, w = 0.2) {
   return(c(x_start, y_start, x_end, y_end))
 }
 
-#' @title Determine python and fiora installation status.
-#' @param silent TRUE.
-#' @return Returns NULL.
-#' @noRd
-#' @keywords internal
-check_fiora_python_installation <- function(silent = FALSE) {
-  # default location on BAM Server
-  command <- "/home/shiny_test/miniforge3/envs/fiora/bin/python.exe"
-  if (file.exists(command)) {
-    message("BAM Server. Python path: ", command)
-  } else {
-    verify_suggested("reticulate")
-    if (isTRUE(getOption("fiora.deploy_to_shinyapps", FALSE))) {
-      # Auf shinyapps.io: virtuelle Umgebung mit py_require()
-      if (!silent) message("Installing a virtual python environment and 'fiora' on shinyapps.io.")
-      reticulate::py_require("git+https://github.com/BAMeScience/fiora.git")
-    } else {
-      # Lokal: Conda-Umgebung erstellen und aktivieren
-      if (!tryCatch(file.exists(reticulate::conda_binary()), error = function(e) FALSE)) {
-        reticulate::install_miniconda(path = reticulate::miniconda_path(), update = FALSE, force = FALSE)
-      }
-      if (dir.exists(file.path(reticulate::miniconda_path(), "envs", "fiora"))) {
-        if (!silent) message("A python conda environment named 'fiora' was found and will be used.")
-      } else {
-        if (!silent) message("A python conda environment named 'fiora' will be installed...")
-        reticulate::conda_create("fiora")
-        reticulate::conda_install(envname = "fiora", packages = "git+https://github.com/BAMeScience/fiora.git", pip = TRUE, channel = "defaults")
-      }
-      reticulate::use_condaenv(condaenv = "fiora", conda = "auto", required = NULL)
-    }
-    command <- reticulate::py_config()$python
-  }
-  invisible(command)
-}
-
-check_fiora_scipt <- function(fiora_script = NULL) {
-  if (is.null(fiora_script)) {
-    fiora_script <- "/home/shiny_test/miniforge3/envs/fiora/bin/fiora-predict"
-    if (file.exists(fiora_script)) {
-      # default location on BAM Server
-      message("BAM Server. Script path: ", fiora_script)
-    } else {
-      verify_suggested("reticulate")
-      fiora_script <- list.files(path=reticulate::py_config()$pythonhome, pattern="^fiora-predict$", recursive = TRUE, full.names = TRUE)
-    }
-  }
-  if (!file.exists(fiora_script)) {
-    message("The file specified in parameter 'fiora_script' (", fiora_script, ") does not exist")
-  } else {
-    message("Using file ", fiora_script, " as python script fiora-predict")
-  }
-  return(fiora_script)
-}
-
 #' @title verify_suggested.
 #' @description Check if packages are available and stop function otherwise.
 #' @param pkg Package names to be checked.
@@ -230,4 +176,46 @@ verify_suggested <- function(pkg) {
     stop(msg)
   }
   invisible(NULL)
+}
+
+#' @title find_fiora_predict_paths.
+#' @description Determin current OS, python installation path and script path and return all 3 as a named list.
+#' @param default_path Default base path of python installation.
+#' @param script_name script_name.
+#' @return A named list.
+#' @keywords internal
+#' @noRd
+find_fiora_predict_paths <- function(
+    default_path = "/home/shiny_test/miniforge3",
+    script_name = "fiora-predict"
+) {
+  # Hilfsfunktion zur Pfadprüfung
+  is_valid_path <- function(path) { !is.null(path) && file.exists(path) }
+
+  # current OS
+  os <- Sys.info()[["sysname"]]
+
+  # Wenn default_path ungültig verwende reticulate::miniconda_path()
+  if (!is_valid_path(default_path)) {
+    message("No valid default_path provided, using reticulate::miniconda_path.")
+    verify_suggested("reticulate")
+    default_path <- reticulate::miniconda_path()
+  }
+
+  #
+  if (os == "Windows") {
+    default_path <- file.path(default_path, "envs", "fiora")
+    python_path <- file.path(default_path, "python.exe")
+    script_path <- file.path(default_path, "Scripts", script_name)
+  } else {
+    default_path <- file.path(default_path, "envs", "fiora", "bin")
+    python_path <- file.path(default_path, "python")
+    script_path <- file.path(default_path, script_name)
+  }
+
+  return(list(
+    "os" = os,
+    "python" = normalizePath(python_path, mustWork = FALSE),
+    "script" = normalizePath(script_path, mustWork = FALSE)
+  ))
 }

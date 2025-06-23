@@ -74,7 +74,6 @@ page_fioRa_server <- function(id, fiora_script = "/home/shiny_test/miniforge3/en
     # # ensure that reticulate is set up and that fiora is installed
     waiter::waiter_show(html = tagList(waiter::spin_fading_circles(), "fioRa is still loading (might take 3-4 minutes)..."))
     # get or check fiora-predict script
-    #fiora_script <- check_fiora_scipt(fiora_script)
 
     # write test data to input file
     temp_input_file <- tempfile(fileext = ".csv")
@@ -110,10 +109,14 @@ page_fioRa_server <- function(id, fiora_script = "/home/shiny_test/miniforge3/en
         cat(input$text_input, file = temp_input_file, append = FALSE)
 
         # establish system command and args and run script
-        # command <- check_fiora_python_installation()
-        # args <- c(fiora_script, paste0('-i \"', temp_input_file, '\"'), paste0('-o \"', temp_output_file, '\"'), "--annotation")
-        # msg <- system2(command = command, args = args)
-        msg <- system2(command = fiora_script, args = c(paste0('-i \"', temp_input_file, '\"'), paste0('-o \"', temp_output_file, '\"'), "--annotation"))
+        fioRa_pth <- find_fiora_predict_paths()
+        args <- c(paste0('-i \"', temp_input_file, '\"'), paste0('-o \"', temp_output_file, '\"'), "--annotation")
+        if (fioRa_pth$os == "Windows") {
+          msg <- system2(command = fioRa_pth$python, args = c(fioRa_pth$script, args))
+        } else {
+          msg <- system2(command = fioRa_pth$script, args = args)
+        }
+
         if (msg==0) rv$fiora_finished <- rv$fiora_finished+1
       waiter::waiter_hide()
     })
