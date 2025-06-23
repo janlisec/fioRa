@@ -45,17 +45,17 @@ app_ui <- function(request) {
         icon = shiny::icon("angle-right"),
         shiny::div(style = nps, page_fioRa_ui("fioRa"))
       ),
-      bslib::nav_panel(
-        id = "panel_tools",
-        title = "Tools",
-        icon = shiny::icon("angle-right"),
-        shiny::div(style = nps, shiny::HTML("Auxilliary tools, <i>i.e.</i> to retrieve a SMILES for a compound name or similar..."))
-      ),
+      # bslib::nav_panel(
+      #   id = "panel_tools",
+      #   title = "Tools",
+      #   icon = shiny::icon("angle-right"),
+      #   shiny::div(style = nps, shiny::HTML("Auxilliary tools, <i>i.e.</i> to retrieve a SMILES for a compound name or similar..."))
+      # ),
       bslib::nav_panel(
         id = "panel_help",
         title = "Help",
         icon = shiny::icon("angle-right"),
-        shiny::div(style = nps, shiny::HTML("Here shall be a nice help page..."))
+        shiny::div(style = nps, shiny::HTML('Please go to the <a href="https://github.com/janlisec/fioRa" target="_blank" rel="noopener noreferrer">fioRa GitHub page</a> to read the documentation.'))
       )
     )
   )

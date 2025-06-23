@@ -13,10 +13,12 @@ output: github_document
 )
 ```
 
-# `{fioRa}`
+# `{fioRa}` `r golem::pkg_version()`
 
 <!-- badges: start -->
 [![Static Badge](https://img.shields.io/badge/LiveApp-blue)](https://apps.bam.de/shn01/fioRa/)
+[![R-CMD-check](https://github.com/janlisec/fioRa/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/janlisec/fioRa/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/janlisec/fioRa/graph/badge.svg)](https://app.codecov.io/gh/janlisec/fioRa)
 [![Static Badge](https://img.shields.io/badge/doi-10.1038/s41467--025--57422--4-yellow.svg)](https://doi.org/10.1038/s41467-025-57422-4)
 <!-- badges: end -->
 
@@ -73,26 +75,15 @@ fioRa::run_app()
 
 ![fioRa screenshot](dev/fioRa_screenshot.png?raw=true "fioRa screenshot")
 
-or use the exported function `run_script` to work in the R command line directly:
+or use the exported function `run_script()` to work in the R command line 
+directly. This will accept R styled input parameters, generate an appropriate 
+temporary **FIORA** input file, process it and return an R styled list including 
+the predicted MS/MS spectrum.
 
-```{r run_script, eval = FALSE}
+```{r run_script, eval = TRUE}
 fioRa::run_script(Name = "Example_0", SMILES = "CC1=CC(=O)OC2=CC(OS(O)(=O)=O)=CC=C12")
 ```
 
 ## About
 
 You are reading the doc about version `r golem::pkg_version()` compiled on `r Sys.time() `.
-
-Here are the tests results and package coverage:
-
-```{r, error = TRUE}
-devtools::check(quiet = TRUE)
-```
-
-```{r echo = FALSE}
-unloadNamespace("fioRa")
-```
-
-```{r, error = TRUE}
-covr::package_coverage()
-```

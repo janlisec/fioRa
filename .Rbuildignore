@@ -2,9 +2,11 @@
 ^\.Rproj\.user$
 ^data-raw$
 dev_history.R
+^app.R$
 ^dev$
 ^rsconnect$
 $run_dev.*
 ^.here$
 ^LICENSE\.md$
 ^README\.Rmd$
+^\.github$
