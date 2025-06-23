@@ -25,10 +25,32 @@ page_fioRa_ui <- function(id) {
       padding = 0,
       sidebar = bslib::sidebar(
         id = ns("sidebar_input"),
-        title = "fioRa Input", position = "left", open = "open", width = 720,
-        shiny::fileInput(inputId = ns("file_input"), label = "Select csv input file (or enter compound info manually below)"),
-        shiny::textAreaInput(inputId = ns("text_input"), label = "Enter infos for up to 10 compounds (one per row) in depicted format:", value = "Name,SMILES,Precursor_type,CE,Instrument_type\n", rows = 12),
-        shiny::actionButton(inputId = ns("start_button"), "Process input")
+        #title = "fioRa Input",
+        position = "left", open = "open", width = 720,
+        bslib::accordion(id = ns("acc"), multiple = FALSE, open = "[Textbox] Copy/paste fioRa input",
+          bslib::accordion_panel(
+            "[File] Load fioRa input from csv-file",
+            #shiny::fileInput(inputId = ns("file_input"), label = "Select csv input file (or enter compound info manually below)"),
+            shiny::fileInput(inputId = ns("file_input"), label = NULL),
+          ),
+          bslib::accordion_panel(
+            "[Form] Create fioRa input using form (single compound)",
+            #shiny::textInput(inputId = ns("frm_name"), label = "Name", value = "Example_0"),
+            shiny::textInput(inputId = ns("frm_smiles"), label = "SMILES", value = "CC1=CC(=O)OC2=CC(OS(O)(=O)=O)=CC=C12"),
+            bslib::layout_columns(
+              shiny::selectInput(inputId = ns("frm_ptype"), label = "Precursor_type", choices = c("[M+H]+","[M-H]-"), selected = "[M-H]-"),
+              shiny::numericInput(inputId = ns("frm_ce"), label = "CE", value = 17, min = 1, max = 100, step = 1),
+              shinyjs::disabled(shiny::selectInput(inputId = ns("frm_itype"), label = "Instrument_type", choices = c("HCD"))),
+            ),
+            shiny::actionButton(inputId = ns("frm_btn"), label = "Transfer to [Textbox]")
+          ),
+          bslib::accordion_panel(
+            "[Textbox] Copy/paste fioRa input",
+            #shiny::textAreaInput(inputId = ns("text_input"), label = "Enter infos for up to 10 compounds (one per row) in depicted format:", value = "Name,SMILES,Precursor_type,CE,Instrument_type\n", rows = 12)
+            shiny::textAreaInput(inputId = ns("text_input"), label = NULL, value = "Name,SMILES,Precursor_type,CE,Instrument_type\n", rows = 12)
+          )
+        ),
+        shiny::actionButton(inputId = ns("start_button"), "Process [Textbox] input")
       ),
       bslib::card(
         full_screen = TRUE,
@@ -71,9 +93,6 @@ page_fioRa_ui <- function(id) {
 page_fioRa_server <- function(id, fiora_script = "/home/shiny_test/miniforge3/envs/fiora/bin/fiora-predict"){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
-    # # ensure that reticulate is set up and that fiora is installed
-    waiter::waiter_show(html = tagList(waiter::spin_fading_circles(), "fioRa is still loading (might take 3-4 minutes)..."))
-    # get or check fiora-predict script
 
     # write test data to input file
     temp_input_file <- tempfile(fileext = ".csv")
@@ -97,7 +116,6 @@ page_fioRa_server <- function(id, fiora_script = "/home/shiny_test/miniforge3/en
 
     shiny::observeEvent(rv$test_data, {
       shiny::updateTextAreaInput(inputId = "text_input", value = paste(test_data, collapse="\n"))
-      waiter::waiter_hide()
     })
 
     shiny::observeEvent(input$start_button, {
@@ -168,6 +186,17 @@ page_fioRa_server <- function(id, fiora_script = "/home/shiny_test/miniforge3/en
     shiny::observeEvent(input$file_input, {
       tmp_data <- readLines(input$file_input$datapath)
       shiny::updateTextAreaInput(inputId = "text_input", value = paste(tmp_data, collapse="\n"))
+      bslib::accordion_panel_open(id = "acc", values = "[Textbox] Copy/paste fioRa input")
+    })
+
+    shiny::observeEvent(input$frm_btn, {
+      tmp_data <- c(
+        "Name,SMILES,Precursor_type,CE,Instrument_type",
+        paste("Name", input$frm_smiles, input$frm_ptype, input$frm_ce, input$frm_itype, sep=","),
+        ""
+      )
+      shiny::updateTextAreaInput(inputId = "text_input", value = paste(tmp_data, collapse="\n"))
+      bslib::accordion_panel_open(id = "acc", values = "[Textbox] Copy/paste fioRa input")
     })
 
   })
