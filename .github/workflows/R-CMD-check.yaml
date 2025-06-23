@@ -40,31 +40,15 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Create and activate virtual environment and install Python dependencies
-        run: |
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
-            python -m venv fiora
-            .\\fiora\\Scripts\\activate
-            pip install --upgrade pip
-            pip install git+https://github.com/BAMeScience/fiora.git
-          elif [[ "$RUNNER_OS" == "macOS" || "$RUNNER_OS" == "Linux" ]]; then
-            python -m venv fiora
-            source fiora/bin/activate
-            pip install --upgrade pip
-            pip install git+https://github.com/BAMeScience/fiora.git
-          fi
-        shell: bash
-
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
           needs: check
+
+      - name: Install Python dependencies in r-miniconda
+        run: |
+        Rscript -e "reticulate::conda_create('fiora')"
+        Rscript -e "reticulate::conda_install('fiora', 'git+https://github.com/BAMeScience/fiora.git', pip = TRUE)"
 
       - uses: r-lib/actions/check-r-package@v2
         with:
