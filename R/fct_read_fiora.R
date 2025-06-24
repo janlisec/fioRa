@@ -9,6 +9,7 @@
 #'
 #' @noRd
 read_fiora <- function(fl) {
+    #message("read_fiora")
     x <- readLines(fl)
     i <- which(x=="BEGIN IONS")
     out <- lapply(split(x, factor(rep(1:length(i), times=diff(c(i, length(x)+1))))), function(y) {
@@ -33,6 +34,9 @@ read_fiora <- function(fl) {
         s$formula <- sapply(s$SMILES, function(z) { smiles2formula(z) }, USE.NAMES = FALSE)
       }
       s <- s[order(s[,"mz"], decreasing = FALSE),]
+      # $$ToDo$$
+      # - remove mz redundancy for multiple SMILES giving the same mz at different int values
+      # - possibly scale spectrum to max=100
       rownames(s) <- 1:nrow(s)
       c(meta, list("spec" = s))
     })

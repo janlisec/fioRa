@@ -1,3 +1,8 @@
+# v0.2.5 by jan.lisec@bam.de
+
+* neutral losses shown in spectra plots
+* sum formulas corrected for H number using the adduct annotation of **FIORA**
+
 # v0.2.4 by jan.lisec@bam.de
 
 * predict() renamed to run_script()

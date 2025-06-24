@@ -1,7 +1,7 @@
 #' @title Calculate Molecular Formula from SMILES with rcdk.
 #' @description A small wrapper function to calculate the molecular formula
 #'     from SMILES with the rcdk, as recommended. Note: current version does
-#'     not handle labelling.
+#'     not handle labeling.
 #' @param smiles Valid SMILES code used to calculate the formula.
 #' @author Emma Schymanski <emma.schymanski@@uni.lu>
 #' @examples
@@ -42,8 +42,10 @@ smiles2formula <- function(smiles) {
 renderSMILES <- function(smiles, kekulise=TRUE, coords=c(0,0,100,100)) {
   if (nchar(smiles)>1) {
     mol <- rcdk::parse.smiles(smiles,kekulise=kekulise)[[1]]
+    mol <- rcdk::generate.2d.coordinates(mol)
+    depictor <- rcdk::get.depictor(width = 200, height = 200, zoom = 1.0, fillToFit = FALSE)
     img <- tryCatch({
-      (rcdk::view.image.2d(mol))
+      (rcdk::view.image.2d(mol, depictor = depictor))
     }, error = function(e) {
       img <- ""
       message(paste("Invalid SMILES not rendered: ", smiles, sep=""))
@@ -51,8 +53,11 @@ renderSMILES <- function(smiles, kekulise=TRUE, coords=c(0,0,100,100)) {
     if (length(img)<=2 && kekulise) {
       message("Replotting with kekulise=FALSE")
       mol <- rcdk::parse.smiles(smiles,kekulise=FALSE)[[1]]
+      mol <- rcdk::parse.smiles(smiles,kekulise=kekulise)[[1]]
+      mol <- rcdk::generate.2d.coordinates(mol)
+      depictor <- rcdk::get.depictor(width = coords[3]-coords[1], height = coords[4]-coords[2], zoom = 1.0, fillToFit = FALSE)
       img <- tryCatch({
-        (rcdk::view.image.2d(mol))
+        (rcdk::view.image.2d(mol, depictor = depictor))
       }, error = function(e) {
         img <- ""
         message(paste("Invalid SMILES not plotted without kekulise either: ", smiles, sep=""))
@@ -62,7 +67,22 @@ renderSMILES <- function(smiles, kekulise=TRUE, coords=c(0,0,100,100)) {
       # make points of white color transparent
       img[,,4] <- matrix(abs(as.numeric(img[,,1]==1 & img[,,2]==1 & img[,,3]==1)-1), nrow = nrow(img[,,1]))
       # raster image
-      graphics::rasterImage(img, coords[1], coords[2], coords[3], coords[4])
+      #graphics::rasterImage(img, coords[1], coords[2], coords[3], coords[4])
+      #browser()
+      # compute y-shift according to empty bottom rows
+      empty_rows <- apply(img[,,4],1,function(x){all(x==0)})
+      strip_height_percent <- 1-(table(diff(which(empty_rows)))[1])/nrow(img[,,4])
+      coords[4] <- coords[2]+(coords[4]-coords[2])*strip_height_percent
+      # shift one line of text up
+      usr <- graphics::par("usr")
+      x_range <- usr[2] - usr[1]
+      y_range <- usr[4] - usr[3]
+      coords[2] <- coords[2]+y_range/30
+      coords[4] <- coords[4]+y_range/30
+
+      stripped_img <- img[!empty_rows,,]
+      graphics::rasterImage(stripped_img, coords[1], coords[2], coords[3], coords[4])
+      #graphics::rect(coords[1], coords[2], coords[3], coords[4])
     }
   }
   invisible(img)
@@ -71,50 +91,46 @@ renderSMILES <- function(smiles, kekulise=TRUE, coords=c(0,0,100,100)) {
 #' @title Plot MS^2 spectrum.
 #' @description This function...
 #' @param s A valid spectrum as predicted by fiora.
-#' @param n Code defining the annotation.
-#' @param ... Further parameters to `plot()`.
+#' @param show_neutral_losses show_neutral_losses.
+#' @param ... Passed on to InterpretMSSpectrum::PlotSpec().
 #' @details More information about aromaticity: \url{https://github.com/CDK-R/cdkr/issues/49}
 #' @examples
 #' fl <- system.file("extdata/annotated_output.mgf", package = "fioRa")
 #' tmp <- fioRa:::read_fiora(fl = fl)
 #' s <- tmp[[1]][["spec"]]
-#' plot_spec(s = s, n=-1)
+#' plot_spec(s = s)
 #' @return Returns a plot.
 #' @noRd
 #' @keywords internal
-# plot_spec_old <- function(s, n = NA, ...) {
-#   x = s[,"mz"]
-#   y = s[,"int"]
-#   plot(x = x, y = y, type="h", xlab="m/z", ylab="Int (relative)", ...)
-#   if (!is.na(n)) {
-#     if (n>=0) {
-#       # annotate mz and round to n precision
-#       flt <- y > 0.05*max(y, na.rm=T) & y < 0.9*max(y, na.rm=T)
-#       graphics::text(x = x[flt], y = y[flt], labels=round(x[flt],n), adj=c(0.5,0), col=4)
-#       flt <- y > 0.9*max(y, na.rm=T)
-#       graphics::text(x = x[flt], y = y[flt], labels=round(x[flt],n), adj=c(0.5,1), col=4)
-#     }
-#     if (n==-1) {
-#       flt <- y > 0.05*max(y, na.rm=T)
-#       graphics::text(x = x[flt], y = y[flt], labels=s[flt,"formula"], adj=c(0.5,0), col=4)
-#     }
-#   }
-# }
-#
-plot_spec <- function(s, n = NA, ...) {
-  neutral_losses <- data.frame("Name"="test", "Formula"="SO3", "Mass"=79.956)
-  flt <- s[,"int"] > 0.05*max(s[,"int"], na.rm=T)
-  txt <- data.frame("x"=s[flt,"mz"], "txt"=s[flt,"formula"],"expr"=TRUE)
+plot_spec <- function(s, show_neutral_losses = TRUE, ...) {
+  #flt <- which(s[,"int"] > 0.05*max(s[,"int"], na.rm=T))
+  rownames(s) <- 1:nrow(s)
+  flt <- sort(as.numeric(sapply(split(s, s[,"formula"]), function(x) { rownames(x)[which.max(x[,"int"])] })))
+  # correct formula by adduct information for number of H
+  for (i in flt) s[i,"formula"] <- add_adduct(s[i,"formula"], s[i,"adduct"])
+  txt <- data.frame("x"=s[flt,"mz"], "txt"=s[flt,"formula"], "expr"=TRUE)
   txt$txt <- sapply(txt$txt, function(x) {
     x <- InterpretMSSpectrum::CountChemicalElements(x = x)
     paste(names(x), sapply(x, function(n) { if(n==1) "" else paste0("[",n,"]")}), sep="", collapse="~")
   })
+  neutral_losses <- NULL
+  if (show_neutral_losses && length(flt)>=2) {
+    ele_precursor <- InterpretMSSpectrum::CountChemicalElements(s[flt[length(flt)],"formula"])
+    nl <- unname(sapply(s[flt[-length(flt)],"formula"], function(x) {
+      x <- ele_precursor-InterpretMSSpectrum::CountChemicalElements(x, ele = names(ele_precursor))
+      x <- x[x>0]
+      paste(names(x), sapply(x, function(n) { if (n==1) "" else n }), sep="", collapse="")
+      #paste(names(x), sapply(x, function(n) { if(n==1) "" else paste0("[",n,"]")}), sep="", collapse="~")
+      #paste(names(x), x, sep="", collapse="")
+    }))
+    neutral_losses <- data.frame("Name"=nl, "Formula"=nl, "Mass"=s[flt[length(flt)],"mz"]-s[flt[-length(flt)],"mz"])
+  }
   # opar <- par(no.readonly = TRUE)
   # on.exit(graphics::par(cex = opar$cex))
   # par("cex"=1.25)
-  InterpretMSSpectrum::PlotSpec(x=s[,1:2], cutoff = 0, txt = txt, neutral_losses = neutral_losses, masslab = 0.01)
-  for (i in which(flt)) {
-    renderSMILES(smiles = s[i,"SMILES"], coords = square_subplot_coord(x = s[i,"mz"], y = s[i,"int"]))
+  InterpretMSSpectrum::PlotSpec(x=s[,1:2], masslab = 0.01, cutoff = 0, txt = txt, ionization="ESI", neutral_losses = neutral_losses, precursor = s[nrow(s),1], ...)
+  for (i in flt) {
+    renderSMILES(smiles = s[i,"SMILES"], coords = square_subplot_coord(x = s[i,"mz"], y = s[i,"int"], w = 0.2))
   }
 }
 
@@ -122,7 +138,7 @@ plot_spec <- function(s, n = NA, ...) {
 #' @param x x coordinate.
 #' @param y y coordinate.
 #' @param w Relative proportion of figure region to cover.
-#' @return Returns coordinates for a squqre shape sub-plot.
+#' @return Returns coordinates for a square shape sub-plot.
 #' @noRd
 #' @keywords internal
 square_subplot_coord <- function(x, y, w = 0.2) {
@@ -130,7 +146,7 @@ square_subplot_coord <- function(x, y, w = 0.2) {
   device_width <- grDevices::dev.size("in")[1]
   device_height <- grDevices::dev.size("in")[2]
 
-  # Berechnung der Größe des Subplots (10% der kleineren Seite)
+  # Berechnung der Größe des Subplots (w % der kleineren Seite)
   subplot_size <- w * min(device_width, device_height)
 
   # Ermittlung der user coordinates
@@ -149,7 +165,6 @@ square_subplot_coord <- function(x, y, w = 0.2) {
   }
 
   # Berechnung der Position des Subplots
-  x_len <- subplot_size * x_range / device_width
   x_start <- x - x_len/2
   y_start <- y
   x_end <- x + x_len/2
@@ -220,3 +235,35 @@ find_fiora_predict_paths <- function(
     "script" = normalizePath(script_path, mustWork = FALSE)
   ))
 }
+
+#' @title add_adduct.
+#' @description Add FIORA adduct to formula.
+#' @param fml SumFormula.
+#' @param ad Adduct.
+#' @return SumFormula.
+#' @examples
+#' add_adduct(fml = "CHO", ad = "[M+2H]+")
+#' @keywords internal
+#' @noRd
+add_adduct <- function(fml, ad) {
+  possible_adds <- setNames(c(0,0,-1*(1:3),1:3,-1*(1:3),1:3), gsub("1", "", c("[M]-", "[M]+", paste0("[M-",1:3,"H]-"), paste0("[M+",1:3,"H]-"), paste0("[M-",1:3,"H]+"), paste0("[M+",1:3,"H]+"))))
+  if(!(ad %in% names(possible_adds))) {
+    message("Dont know this adduct definition", ad)
+    stop()
+  }
+  fml_ad <- cce(fml)
+  if (possible_adds[ad]!=0) {
+    fml_ad["H"] <- fml_ad["H"]+possible_adds[ad]
+  }
+  fml_ad <- paste(names(fml_ad), fml_ad, sep="", collapse="")
+  return(fml_ad)
+}
+
+#' @title cce.
+#' @description CountChemicalElements.
+#' @param x x.
+#' @param ele ele.
+#' @return CountChemicalElements.
+#' @keywords internal
+#' @noRd
+cce <- InterpretMSSpectrum::CountChemicalElements

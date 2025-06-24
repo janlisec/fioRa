@@ -60,6 +60,7 @@ page_fioRa_ui <- function(id) {
           shiny::div(style = "height: 72px; font-size: 1.25rem; padding-top: 38px;", "fioRa output"),
           shinyjs::hidden(shiny::div(
             id = ns("usr_opt"),
+            shiny::div(style = "float: left; margin-left: 15px;", shiny::checkboxInput(inputId = ns("show_neutral_losses"), label = "show_neutral_losses", value = TRUE)),
             shiny::div(style = "float: left; margin-left: 15px;", shiny::selectInput(inputId = ns("name"), label = NULL, choices = "")),
             #shiny::div(style = "float: left; margin-left: 15px;", shiny::sliderInput(inputId = ns("digits"), label = NULL, min = -1, max = 4, value = 3, step = 1)),
             shiny::div(style = "float: left; margin-left: 15px;", shiny::downloadButton(outputId = ns("btn_download_msp"), label = ""))
@@ -118,25 +119,35 @@ page_fioRa_server <- function(id, fiora_script = "/home/shiny_test/miniforge3/en
       shiny::updateTextAreaInput(inputId = "text_input", value = paste(test_data, collapse="\n"))
     })
 
-    shiny::observeEvent(input$start_button, {
+    start_button_events <- function() {
       bslib::toggle_sidebar(id = "sidebar_input", open = FALSE, session = session)
       bslib::toggle_sidebar(id = "sidebar_spec", open = TRUE, session = session)
       waiter::waiter_show(id = ns("sidebar_input"), html = tagList(waiter::spin_fading_circles(), "fioRa is processing your input..."))
-        # write current text input to file
-        # ToDo: allow only up to 10 compounds
-        cat(input$text_input, file = temp_input_file, append = FALSE)
+      # write current text input to file
+      text_input <- input$text_input
+      n <- gregexpr("\n", text_input)[[1]]
+      n_max <- 10
+      if ((1+length(n))>n_max) {
+        message("fioRa processing is limited to ", n_max, " compounds at max")
+        text_input <- substr(text_input, 1, n[1+n_max])
+      }
+      cat(text_input, file = temp_input_file, append = FALSE)
 
-        # establish system command and args and run script
-        fioRa_pth <- find_fiora_predict_paths()
-        args <- c(paste0('-i \"', temp_input_file, '\"'), paste0('-o \"', temp_output_file, '\"'), "--annotation")
-        if (fioRa_pth$os == "Windows") {
-          msg <- system2(command = fioRa_pth$python, args = c(fioRa_pth$script, args))
-        } else {
-          msg <- system2(command = fioRa_pth$script, args = args)
-        }
+      # establish system command and args and run script
+      fioRa_pth <- find_fiora_predict_paths()
+      args <- c(paste0('-i \"', temp_input_file, '\"'), paste0('-o \"', temp_output_file, '\"'), "--annotation")
+      if (fioRa_pth$os == "Windows") {
+        msg <- system2(command = fioRa_pth$python, args = c(fioRa_pth$script, args))
+      } else {
+        msg <- system2(command = fioRa_pth$script, args = args)
+      }
 
-        if (msg==0) rv$fiora_finished <- rv$fiora_finished+1
+      if (msg==0) rv$fiora_finished <- rv$fiora_finished+1
       waiter::waiter_hide()
+    }
+
+    shiny::observeEvent(input$start_button, {
+      start_button_events()
     })
 
     shiny::observeEvent(rv$fiora_finished, {
@@ -160,8 +171,8 @@ page_fioRa_server <- function(id, fiora_script = "/home/shiny_test/miniforge3/en
 
     output$spec <- shiny::renderPlot({
       req(input$name, rv$res)
-      #cex.axis=1.25, cex.lab=1.25,
-      plot_spec(s = rv$res[[input$name]][["spec"]], xlim = ranges$x, ylim = ranges$y)
+      message("generating plot")
+      plot_spec(s = rv$res[[input$name]][["spec"]], show_neutral_losses = input$show_neutral_losses, xlim = ranges$x, ylim = ranges$y)
     })
 
     # When a double-click happens, check if there's a brush on the plot.
@@ -171,11 +182,11 @@ page_fioRa_server <- function(id, fiora_script = "/home/shiny_test/miniforge3/en
       if (!is.null(brush)) {
         ranges$x <- c(brush$xmin, brush$xmax)
         ranges$y <- c(brush$ymin, brush$ymax)
-
       } else {
         ranges$x <- NULL
         ranges$y <- NULL
       }
+      message("double click in plot to zoom. x = ", ranges$x, ", y = ", ranges$y)
     })
 
     output$tab <- shiny::renderTable({
@@ -197,6 +208,7 @@ page_fioRa_server <- function(id, fiora_script = "/home/shiny_test/miniforge3/en
       )
       shiny::updateTextAreaInput(inputId = "text_input", value = paste(tmp_data, collapse="\n"))
       bslib::accordion_panel_open(id = "acc", values = "[Textbox] Copy/paste fioRa input")
+      #start_button_events()
     })
 
   })
