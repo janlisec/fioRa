@@ -2,6 +2,7 @@
 
 * neutral losses shown in spectra plots
 * sum formulas corrected for H number using the adduct annotation of **FIORA**
+* sum formulas scaled to comparable size in spectra plots
 
 # v0.2.4 by jan.lisec@bam.de
 

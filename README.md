@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# `{fioRa}` 0.2.4
+# `{fioRa}` 0.2.5
 
 <!-- badges: start -->
 
@@ -21,7 +21,6 @@ estimates retention times (RT) and collision cross sections (CCS).
 
 The original model and prediction algorithm is implemented in Python and
 can be found at its [GitHub Repo](https://github.com/BAMeScience/fiora).
-
 The full description of the algorithm is published in a [Nature
 Communications article](https://doi.org/10.1038/s41467-025-57422-4).
 
@@ -54,7 +53,7 @@ if (!file.exists(reticulate::miniconda_path())) {
 # [3] install python module fiora in a virtual environment
 if (!reticulate::virtualenv_exists("fiora")) {
   reticulate::virtualenv_create("fiora")
-  reticulate::virtualenva_install(envname = "fiora", packages = "git+https://github.com/BAMeScience/fiora.git")
+  reticulate::virtualenv_install(envname = "fiora", packages = "git+https://github.com/BAMeScience/fiora.git")
 }
 ```
 
@@ -124,5 +123,5 @@ fioRa::run_script(Name = "Example_0", SMILES = "CC1=CC(=O)OC2=CC(OS(O)(=O)=O)=CC
 
 ## About
 
-You are reading the doc about version 0.2.4 compiled on 2025-06-23
-16:07:54.876164.
+You are reading the doc about version 0.2.5 compiled on 2025-06-24
+19:17:50.063353.
