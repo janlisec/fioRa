@@ -123,5 +123,5 @@ fioRa::run_script(Name = "Example_0", SMILES = "CC1=CC(=O)OC2=CC(OS(O)(=O)=O)=CC
 
 ## About
 
-You are reading the doc about version 0.2.5 compiled on 2025-06-24
-19:17:50.063353.
+You are reading the doc about version 0.2.5 compiled on 2025-06-25
+09:43:37.961743.

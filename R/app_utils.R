@@ -110,14 +110,14 @@ plot_spec <- function(s, show_neutral_losses = TRUE, ...) {
   for (i in flt) s[i,"formula"] <- add_adduct(s[i,"formula"], s[i,"adduct"])
   txt <- data.frame("x"=s[flt,"mz"], "txt"=s[flt,"formula"], "expr"=TRUE)
   txt$txt <- sapply(txt$txt, function(x) {
-    x <- InterpretMSSpectrum::CountChemicalElements(x = x)
+    x <- cce(x = x)
     paste(names(x), sapply(x, function(n) { if(n==1) "" else paste0("[",n,"]")}), sep="", collapse="~")
   })
   neutral_losses <- NULL
   if (show_neutral_losses && length(flt)>=2) {
-    ele_precursor <- InterpretMSSpectrum::CountChemicalElements(s[flt[length(flt)],"formula"])
+    ele_precursor <- cce(s[flt[length(flt)],"formula"])
     nl <- unname(sapply(s[flt[-length(flt)],"formula"], function(x) {
-      x <- ele_precursor-InterpretMSSpectrum::CountChemicalElements(x, ele = names(ele_precursor))
+      x <- ele_precursor-cce(x, ele = names(ele_precursor))
       x <- x[x>0]
       paste(names(x), sapply(x, function(n) { if (n==1) "" else n }), sep="", collapse="")
       #paste(names(x), sapply(x, function(n) { if(n==1) "" else paste0("[",n,"]")}), sep="", collapse="~")
