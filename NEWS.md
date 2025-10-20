@@ -1,12 +1,19 @@
+# v0.3.1 by jan.lisec@bam.de
+
+* updated to **fiora** model `1.0.1`
+* increased resolution of spectra plots in app
+* allowed to use different fiora models (from different python environments)
+  in function *run_script()*
+
 # v0.2.5 by jan.lisec@bam.de
 
 * neutral losses shown in spectra plots
-* sum formulas corrected for H number using the adduct annotation of **FIORA**
+* sum formulas corrected for H number using the adduct annotation of **fiora**
 * sum formulas scaled to comparable size in spectra plots
 
 # v0.2.4 by jan.lisec@bam.de
 
-* predict() renamed to run_script()
+* *predict()* renamed to *run_script()*
 * detection of python and script path platform specific
 * script evaluation platform specific
 

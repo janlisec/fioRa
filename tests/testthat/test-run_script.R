@@ -4,5 +4,5 @@ testthat::test_that("fioRa `run_script` function works with default parameters",
   testthat::expect_length(tmp, 1)
   testthat::expect_length(tmp[[1]], 9)
   testthat::expect_true("spec" %in% names(tmp[[1]]))
-  testthat::expect_true(nrow(tmp[[1]][["spec"]])==12)
+  testthat::expect_true(nrow(tmp[[1]][["spec"]])==4)
 })

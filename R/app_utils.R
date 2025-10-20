@@ -220,7 +220,13 @@ find_fiora_predict_paths <- function(
 
   #
   if (os == "Windows") {
-    default_path <- file.path(default_path, "envs", "fiora")
+    # check if default path includes specific environment already and guess environment if not
+    win_path_ele <- strsplit(normalizePath(default_path), "[\\]")[[1]]
+    if ("envs" %in% win_path_ele && length(win_path_ele)>which(win_path_ele == "envs")) {
+      default_path <- do.call(file.path, as.list(win_path_ele[1:(which(win_path_ele == "envs")+1)]))
+    } else {
+      default_path <- file.path(default_path, "envs", "fiora")
+    }
     python_path <- file.path(default_path, "python.exe")
     script_path <- file.path(default_path, "Scripts", script_name)
   } else {
@@ -246,7 +252,7 @@ find_fiora_predict_paths <- function(
 #' @keywords internal
 #' @noRd
 add_adduct <- function(fml, ad) {
-  possible_adds <- setNames(c(0,0,-1*(1:3),1:3,-1*(1:3),1:3), gsub("1", "", c("[M]-", "[M]+", paste0("[M-",1:3,"H]-"), paste0("[M+",1:3,"H]-"), paste0("[M-",1:3,"H]+"), paste0("[M+",1:3,"H]+"))))
+  possible_adds <- stats::setNames(c(0,0,-1*(1:3),1:3,-1*(1:3),1:3), gsub("1", "", c("[M]-", "[M]+", paste0("[M-",1:3,"H]-"), paste0("[M+",1:3,"H]-"), paste0("[M-",1:3,"H]+"), paste0("[M+",1:3,"H]+"))))
   if(!(ad %in% names(possible_adds))) {
     message("Dont know this adduct definition", ad)
     stop()

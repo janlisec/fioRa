@@ -173,7 +173,7 @@ page_fioRa_server <- function(id, fiora_script = "/home/shiny_test/miniforge3/en
       req(input$name, rv$res)
       message("generating plot")
       plot_spec(s = rv$res[[input$name]][["spec"]], show_neutral_losses = input$show_neutral_losses, xlim = ranges$x, ylim = ranges$y)
-    })
+    }, res = 72*1.25)
 
     # When a double-click happens, check if there's a brush on the plot.
     # If so, zoom to the brush bounds; if not, reset the zoom.
