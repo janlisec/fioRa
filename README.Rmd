@@ -81,7 +81,14 @@ an appropriate temporary **FIORA** input file, process it and return an R styled
 list including the predicted MS/MS spectrum.
 
 ```{r run_script, eval = TRUE}
-fioRa::run_script(Name = "Example_0", SMILES = "CC1=CC(=O)OC2=CC(OS(O)(=O)=O)=CC=C12")
+x <- data.frame(
+  Name = "Example_0",
+  SMILES = "CC1=CC(=O)OC2=CC(OS(O)(=O)=O)=CC=C12",
+  Precursor_type = "[M-H]-",
+  CE = 17,
+  Instrument_type = "HCD"
+)
+fioRa::run_script(x = x)
 ```
 
 ## About

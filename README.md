@@ -78,7 +78,14 @@ process it and return an R styled list including the predicted MS/MS
 spectrum.
 
 ``` r
-fioRa::run_script(Name = "Example_0", SMILES = "CC1=CC(=O)OC2=CC(OS(O)(=O)=O)=CC=C12")
+x <- data.frame(
+  Name = "Example_0",
+  SMILES = "CC1=CC(=O)OC2=CC(OS(O)(=O)=O)=CC=C12",
+  Precursor_type = "[M-H]-",
+  CE = 17,
+  Instrument_type = "HCD"
+)
+fioRa::run_script(x = x)
 #> No valid default_path provided, using reticulate::miniconda_path.
 #> $Example_0
 #> $Example_0$TITLE
@@ -116,4 +123,4 @@ fioRa::run_script(Name = "Example_0", SMILES = "CC1=CC(=O)OC2=CC(OS(O)(=O)=O)=CC
 ## About
 
 You are reading the doc about version 0.3.1 compiled on 2025-10-20
-13:02:33.970012.
+18:01:26.94888.

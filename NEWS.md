@@ -1,3 +1,9 @@
+# v0.3.2 by jan.lisec@bam.de
+
+* included `test_data` object in the package
+* modified the `run_script()` function to accept a data frame with multiple 
+  lines as input
+
 # v0.3.1 by jan.lisec@bam.de
 
 * updated to **fiora** model `1.0.1`
@@ -22,10 +28,6 @@
 * script path hardcoded; reticulate not used
 
 # v0.2.2 by jan.lisec@bam.de
-
-* moved reticulate to Suggest in Description if python installation and script is found
-
-# v0.2.1 by jan.lisec@bam.de
 
 * moved reticulate to Suggest in Description if python installation and script is found
 
