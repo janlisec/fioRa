@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# `{fioRa}` 0.2.5
+# `{fioRa}` 0.3.1
 
 <!-- badges: start -->
 
@@ -103,25 +103,17 @@ fioRa::run_script(Name = "Example_0", SMILES = "CC1=CC(=O)OC2=CC(OS(O)(=O)=O)=CC
 #> [1] "HCD"
 #> 
 #> $Example_0$COMMENT
-#> [1] "\"In silico generated spectrum by Fiora OS v0.1.0\""
+#> [1] "\"In silico generated spectrum by FIORA OS v1.0.0\""
 #> 
 #> $Example_0$spec
-#>           mz         int
-#> 1   78.94844 0.001667393
-#> 2   79.95681 0.022089725
-#> 3   80.96409 0.028634388
-#> 4   81.97246 0.002399962
-#> 5  159.04406 0.002223121
-#> 6  173.02332 0.002690818
-#> 7  174.03169 0.004479981
-#> 8  175.03897 0.394105196
-#> 9  176.04734 0.003682357
-#> 10 177.05462 0.025992798
-#> 11 239.97286 0.004418257
-#> 12 254.99688 0.494040728
+#>          mz         int
+#> 1  78.94844 0.013833499
+#> 2  79.95681 0.002825602
+#> 3 175.03897 0.899893463
+#> 4 254.99688 0.102497801
 ```
 
 ## About
 
-You are reading the doc about version 0.2.5 compiled on 2025-06-25
-09:43:37.961743.
+You are reading the doc about version 0.3.1 compiled on 2025-10-20
+13:02:33.970012.

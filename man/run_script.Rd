@@ -30,7 +30,7 @@ run_script(
 
 \item{annotation}{Return SMILES for fragments if TRUE.}
 
-\item{fiora_script}{Python script fiora-predict.}
+\item{fiora_script}{Path to python script fiora-predict.}
 }
 \value{
 A list with the fiora results for the specified compound.
@@ -47,10 +47,17 @@ This wrapper will generate a fiora ready input file (csv-format)
     respective python environment. It will use `system2()` to run the python
     script `fiora-predict` and import its result back into R using the
     internal function `read_fiora()`.
+    You can try different installed version of `fiora` by providing the path
+    the the script explicitly.
 }
 \examples{
 \dontrun{
   run_script()
-  foo <- run_script(annotation = TRUE, min_prob=0.01)
-}#'
+  # modify parameters and store result
+  foo <- run_script("Name" = "Test", min_prob = 0.05)
+  # use a different fiora environment/model
+  s_pth <- "c:/Users/jlisec/AppData/Local/r-miniconda/envs/fiora-0.1.0/Scripts/fiora-predict"
+  foo <- run_script(fiora_script = s_pth)
+}
+
 }

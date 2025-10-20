@@ -7,7 +7,7 @@
 #' @param Instrument_type Instrument type.
 #' @param min_prob Minimum peak probability to be recorded in the spectrum.
 #' @param annotation Return SMILES for fragments if TRUE.
-#' @param fiora_script Python script fiora-predict.
+#' @param fiora_script Path to python script fiora-predict.
 #'
 #' @description A wrapper around the python script `fiora-predict` using the
 #'     fiora open source model to generate a MS^2 spectra for a compound with
@@ -19,17 +19,35 @@
 #'     respective python environment. It will use `system2()` to run the python
 #'     script `fiora-predict` and import its result back into R using the
 #'     internal function `read_fiora()`.
+#'     You can try different installed version of `fiora` by providing the path
+#'     the the script explicitly.
 #'
 #' @return A list with the fiora results for the specified compound.
+#'
 #' @examples
 #' \dontrun{
 #'   run_script()
-#'   foo <- run_script(annotation = TRUE, min_prob=0.01)
-#' }#'
+#'   # modify parameters and store result
+#'   foo <- run_script("Name" = "Test", min_prob = 0.05)
+#'   # use a different fiora environment/model
+#'   s_pth <- "c:/Users/jlisec/AppData/Local/r-miniconda/envs/fiora-0.1.0/Scripts/fiora-predict"
+#'   foo <- run_script(fiora_script = s_pth)
+#' }
+#'
 #' @export
 run_script <- function(Name = "Example_0", SMILES = "CC1=CC(=O)OC2=CC(OS(O)(=O)=O)=CC=C12", Precursor_type = "[M-H]-", CE = 17, Instrument_type = "HCD", min_prob = 0.001, annotation = FALSE, fiora_script = NULL) {
   # get path of python.exe and fiora_predict script
-  fioRa_pth <- find_fiora_predict_paths()
+  #fiora_script <- "c:/Users/jlisec/AppData/Local/r-miniconda/envs/fiora-conda/Scripts/fiora-predict"
+  if (!is.null(fiora_script) && file.exists(fiora_script)) {
+    default_path <- dirname(fiora_script)
+    script_name <- basename(fiora_script)
+  } else {
+    # this should work on the shinyserver installation and is the default for 'find_fiora_predict_paths()'
+    default_path <- "/home/shiny_test/miniforge3"
+    script_name <- "fiora-predict"
+  }
+
+  fioRa_pth <- find_fiora_predict_paths(default_path = default_path, script_name = script_name)
 
   # get input/output files, write data
   temp_input_file <- tempfile(fileext = ".csv")
