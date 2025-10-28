@@ -9,7 +9,8 @@ run_script(
     Precursor_type = "[M-H]-", CE = 17, Instrument_type = "HCD"),
   min_prob = 0.001,
   annotation = FALSE,
-  fiora_script = NULL
+  fiora_script = NULL,
+  fmt = c("list", "df")
 )
 }
 \arguments{
@@ -22,6 +23,9 @@ code of the compounds, Precursor_type (currently "[M-H]-" or "[M+H]+"), CE
 \item{annotation}{Return SMILES for fragments if TRUE.}
 
 \item{fiora_script}{Path to python script fiora-predict.}
+
+\item{fmt}{Set fmt to 'df' to simplify the return value to a data frame (named
+list otherwise).}
 }
 \value{
 A list with the fiora results for the specified compound.

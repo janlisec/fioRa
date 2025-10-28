@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# `{fioRa}` 0.3.1
+# `{fioRa}` 0.3.3
 
 <!-- badges: start -->
 
@@ -85,7 +85,7 @@ x <- data.frame(
   CE = 17,
   Instrument_type = "HCD"
 )
-fioRa::run_script(x = x)
+fioRa::run_script(x = x, annotation = TRUE)
 #> No valid default_path provided, using reticulate::miniconda_path.
 #> $Example_0
 #> $Example_0$TITLE
@@ -113,14 +113,14 @@ fioRa::run_script(x = x)
 #> [1] "\"In silico generated spectrum by FIORA OS v1.0.0\""
 #> 
 #> $Example_0$spec
-#>          mz         int
-#> 1  78.94844 0.013833499
-#> 2  79.95681 0.002825602
-#> 3 175.03897 0.899893463
-#> 4 254.99688 0.102497801
+#>          mz         int                           SMILES  adduct  formula
+#> 1  78.94844 0.013833499                      O=[SH](=O)O [M-3H]-    H2O3S
+#> 2  79.95681 0.002825602                      O=[SH](=O)O [M-2H]-    H2O3S
+#> 3 175.03897 0.899893463           Cc1cc(=O)oc2cc(O)ccc12  [M-H]-  C10H8O3
+#> 4 254.99688 0.102497801 Cc1cc(=O)oc2cc(OS(=O)(=O)O)ccc12  [M-H]- C10H8O6S
 ```
 
 ## About
 
-You are reading the doc about version 0.3.1 compiled on 2025-10-20
-18:01:26.94888.
+You are reading the doc about version 0.3.3 compiled on 2025-10-28
+18:31:33.046358.

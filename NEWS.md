@@ -1,3 +1,8 @@
+# v0.3.3 by jan.lisec@bam.de
+
+* `run_script` gains an argument `fmt` which allows to export results in a data frame
+* additional test_that tests implemented to prepare for CRAN release
+
 # v0.3.2 by jan.lisec@bam.de
 
 * included `test_data` object in the package

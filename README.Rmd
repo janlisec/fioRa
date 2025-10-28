@@ -88,7 +88,7 @@ x <- data.frame(
   CE = 17,
   Instrument_type = "HCD"
 )
-fioRa::run_script(x = x)
+fioRa::run_script(x = x, annotation = TRUE)
 ```
 
 ## About

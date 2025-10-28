@@ -6,6 +6,8 @@
 #' @param min_prob Minimum peak probability to be recorded in the spectrum.
 #' @param annotation Return SMILES for fragments if TRUE.
 #' @param fiora_script Path to python script fiora-predict.
+#' @param fmt Set fmt to 'df' to simplify the return value to a data frame (named
+#'     list otherwise).
 #'
 #' @description A wrapper around the python script `fiora-predict` using the
 #'     fiora open source model to generate a MS^2 spectra for a compound with
@@ -59,8 +61,10 @@ run_script <- function(
     ),
     min_prob = 0.001,
     annotation = FALSE,
-    fiora_script = NULL
+    fiora_script = NULL,
+    fmt = c("list","df")
 ) {
+  fmt <- match.arg(fmt)
   # get path of python.exe and fiora_predict script
   if (!is.null(fiora_script) && file.exists(fiora_script)) {
     default_path <- dirname(fiora_script)
@@ -96,6 +100,10 @@ run_script <- function(
   }
 
   # read result
-  if (msg==0) read_fiora(fl = temp_output_file) else msg
+  if (msg==0) {
+    read_fiora(fl = temp_output_file, fmt = fmt)
+  } else {
+    msg
+  }
 }
 

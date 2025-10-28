@@ -273,3 +273,15 @@ add_adduct <- function(fml, ad) {
 #' @keywords internal
 #' @noRd
 cce <- InterpretMSSpectrum::CountChemicalElements
+
+#' @title ldply_base
+#' @param .data list.
+#' @param .fun fun.
+#' @keywords internal
+#' @noRd
+ldply_base <- function(.data, .fun = identity) {
+  result <- lapply(.data, .fun)
+  df <- do.call(rbind, result)
+  df <- data.frame(df, row.names = NULL, check.names = FALSE)
+  return(df)
+}

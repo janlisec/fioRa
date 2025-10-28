@@ -1,10 +1,11 @@
 Package: fioRa
 Title: Mass-Spectra Prediction Using the FIORA Model
-Version: 0.3.2
-Date: 2025-10-20
+Version: 0.3.3
+Date: 2025-10-28
 Authors@R: 
     person("Jan", "Lisec", , "jan.lisec@bam.de", role = c("aut", "cre"))
-Description: Provides a wrapper for the python module `FIORA` as well as a `Shiny`-App to facilitate data processing and visualization.
+Description: Provides a wrapper for the python module `FIORA` as well as a `Shiny`-App 
+    to facilitate data processing and visualization.
 License: MIT + file LICENSE
 Imports: 
     bslib,
