@@ -213,9 +213,13 @@ find_fiora_predict_paths <- function(
 
   # Wenn default_path ungültig verwende reticulate::miniconda_path()
   if (!is_valid_path(default_path)) {
-    message("No valid default_path provided, using reticulate::miniconda_path.")
     verify_suggested("reticulate")
     default_path <- reticulate::miniconda_path()
+    if (!is_valid_path(default_path)) {
+      stop("No valid 'default_path' provided and no valid reticulate::miniconda_path")
+    } else {
+      message("No valid 'default_path' provided, using reticulate::miniconda_path '", default_path, "'.")
+    }
   }
 
   #
