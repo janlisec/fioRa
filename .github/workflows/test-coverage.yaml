@@ -22,6 +22,11 @@ jobs:
         with:
           use-public-rspm: true
 
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::covr, any::xml2, any::reticulate
+          needs: coverage
+
       - name: Install Miniconda via reticulate
         run: |
           Rscript -e "reticulate::install_miniconda(update = FALSE, force = FALSE)"
@@ -35,10 +40,6 @@ jobs:
         run: |
           Rscript -e "reticulate::use_virtualenv('fiora', required = TRUE)"
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: any::covr, any::xml2
-          needs: coverage
       - name: Test coverage
         run: |
           cov <- covr::package_coverage(
