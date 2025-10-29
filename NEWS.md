@@ -1,3 +1,8 @@
+# v0.3.4 by jan.lisec@bam.de
+
+* App GUI improved (better selection of individual results)
+* default python environment switched to conda
+
 # v0.3.3 by jan.lisec@bam.de
 
 * `run_script` gains an argument `fmt` which allows to export results in a data frame

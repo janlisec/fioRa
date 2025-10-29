@@ -31,14 +31,11 @@ jobs:
         run: |
           Rscript -e 'reticulate::install_miniconda(update = FALSE, force = FALSE)'
 
-      - name: Create and install Python virtualenv 'fiora'
+      - name: Create and install Python conda env 'fiora'
         run: |
-          Rscript -e 'reticulate::virtualenv_create("fiora")'
-          Rscript -e 'reticulate::virtualenv_install("fiora", packages = "git+https://github.com/BAMeScience/fiora.git")'
-
-      - name: Set reticulate to use virtualenv 'fiora'
-        run: |
-          Rscript -e 'reticulate::use_virtualenv("fiora", required = TRUE)'
+          Rscript -e 'reticulate::conda_create("fiora")'
+          Rscript -e 'reticulate::conda_install("fiora", packages = "git+https://github.com/BAMeScience/fiora.git", pip = TRUE)'
+          Rscript -e 'reticulate::use_condaenv("fiora", required = TRUE)'
 
       - name: Test coverage
         run: |

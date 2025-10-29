@@ -58,10 +58,11 @@ if (!file.exists(reticulate::miniconda_path())) {
   reticulate::install_miniconda(path = reticulate::miniconda_path(), update = FALSE, force = FALSE)
 }
 
-# [3] install python module fiora in a virtual environment
-if (!reticulate::virtualenv_exists("fiora")) {
-  reticulate::virtualenv_create("fiora")
-  reticulate::virtualenv_install(envname = "fiora", packages = "git+https://github.com/BAMeScience/fiora.git")
+# [3] install python module fiora in a conda environment and activate
+if (!("fiora" %in% reticulate::conda_list()$name)) {
+  reticulate::conda_create("fiora")
+  reticulate::conda_install("fiora", packages = "git+https://github.com/BAMeScience/fiora.git", pip = TRUE)
+  reticulate::use_condaenv("fiora", required = TRUE)
 }
 ```
 

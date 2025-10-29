@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# `{fioRa}` 0.3.3
+# `{fioRa}` 0.3.4
 
 <!-- badges: start -->
 
@@ -50,10 +50,11 @@ if (!file.exists(reticulate::miniconda_path())) {
   reticulate::install_miniconda(path = reticulate::miniconda_path(), update = FALSE, force = FALSE)
 }
 
-# [3] install python module fiora in a virtual environment
-if (!reticulate::virtualenv_exists("fiora")) {
-  reticulate::virtualenv_create("fiora")
-  reticulate::virtualenv_install(envname = "fiora", packages = "git+https://github.com/BAMeScience/fiora.git")
+# [3] install python module fiora in a conda environment and activate
+if (!("fiora" %in% reticulate::conda_list()$name)) {
+  reticulate::conda_create("fiora")
+  reticulate::conda_install("fiora", packages = "git+https://github.com/BAMeScience/fiora.git", pip = TRUE)
+  reticulate::use_condaenv("fiora", required = TRUE)
 }
 ```
 
@@ -122,5 +123,5 @@ fioRa::run_script(x = x, annotation = TRUE)
 
 ## About
 
-You are reading the doc about version 0.3.3 compiled on 2025-10-28
-18:31:33.046358.
+You are reading the doc about version 0.3.4 compiled on 2025-10-29
+14:50:35.100545.
