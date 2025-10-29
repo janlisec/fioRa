@@ -1,5 +1,6 @@
 # Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
 # Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+# adjusted to install python environment 'fiora'
 on:
   push:
     branches: [main, master]
@@ -21,9 +22,7 @@ jobs:
         config:
           - {os: macos-latest,   r: 'release'}
           - {os: windows-latest, r: 'release'}
-          #- {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
-          - {os: ubuntu-latest,   r: 'release'}
-          #- {os: ubuntu-latest,   r: 'oldrel-1'}
+          - {os: ubuntu-latest,  r: 'release'}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -40,17 +39,24 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
+      - name: Install Miniconda via reticulate
+        run: |
+          Rscript -e "reticulate::install_miniconda(update = FALSE, force = FALSE)"
+
+      - name: Create and install Python virtualenv 'fiora'
+        run: |
+          Rscript -e "reticulate::virtualenv_create('fiora')"
+          Rscript -e \"reticulate::virtualenv_install('fiora', packages = 'git+https://github.com/BAMeScience/fiora.git')\"
+
+      - name: Set reticulate to use virtualenv 'fiora'
+        run: |
+          Rscript -e "reticulate::use_virtualenv('fiora', required = TRUE)"
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages:
             any::rcmdcheck
           needs: check
-
-      # - name: Install Python dependencies in r-miniconda
-      #   run: |
-      #   Rscript -e "reticulate::conda_create('fiora')"
-      #   Rscript -e "reticulate::conda_install('fiora', 'git+https://github.com/BAMeScience/fiora.git', pip = TRUE)"
-
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true

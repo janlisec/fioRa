@@ -22,11 +22,23 @@ jobs:
         with:
           use-public-rspm: true
 
+      - name: Install Miniconda via reticulate
+        run: |
+          Rscript -e "reticulate::install_miniconda(update = FALSE, force = FALSE)"
+
+      - name: Create and install Python virtualenv 'fiora'
+        run: |
+          Rscript -e "reticulate::virtualenv_create('fiora')"
+          Rscript -e \"reticulate::virtualenv_install('fiora', packages = 'git+https://github.com/BAMeScience/fiora.git')\"
+
+      - name: Set reticulate to use virtualenv 'fiora'
+        run: |
+          Rscript -e "reticulate::use_virtualenv('fiora', required = TRUE)"
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::covr, any::xml2
           needs: coverage
-
       - name: Test coverage
         run: |
           cov <- covr::package_coverage(
@@ -40,7 +52,6 @@ jobs:
 
       - uses: codecov/codecov-action@v5
         with:
-          # Fail if error if not on PR, or if on PR and token is given
           fail_ci_if_error: ${{ github.event_name != 'pull_request' || secrets.CODECOV_TOKEN }}
           files: ./cobertura.xml
           plugins: noop

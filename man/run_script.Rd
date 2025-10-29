@@ -28,7 +28,7 @@ code of the compounds, Precursor_type (currently "[M-H]-" or "[M+H]+"), CE
 list otherwise).}
 }
 \value{
-A list with the fiora results for the specified compound.
+A list with the fiora results for the specified compound(s).
 }
 \description{
 A wrapper around the python script `fiora-predict` using the
@@ -47,6 +47,7 @@ This wrapper will generate a fiora ready input file (csv-format)
 }
 \examples{
 \dontrun{
+  # !!! running this example will install the python module `fiora`
   td <- fioRa::test_data
   x <- setNames(data.frame(
     t(sapply(td[2:11], function(x) { strsplit(x, ",")[[1]] }))),

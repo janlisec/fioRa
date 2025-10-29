@@ -1,5 +1,5 @@
 testthat::test_that("fioRa `run_script` function works with default parameters", {
-  testthat::skip_on_ci()
+  #testthat::skip_on_ci()
   testthat::skip_on_cran()
   td <- fioRa::test_data
   x <- stats::setNames(data.frame(
@@ -14,7 +14,7 @@ testthat::test_that("fioRa `run_script` function works with default parameters",
 })
 
 testthat::test_that("fioRa `run_script` function returns annotated spectra output", {
-  testthat::skip_on_ci()
+  #testthat::skip_on_ci()
   testthat::skip_on_cran()
   td <- fioRa::test_data
   x <- setNames(data.frame(
