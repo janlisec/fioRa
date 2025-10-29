@@ -1,7 +1,8 @@
 testthat::test_that("fioRa `run_script` function works with default parameters", {
-  skip_if(Sys.getenv("CI") == "true", "Skipping test on CI because python installation is missing there")
+  testthat::skip_on_ci()
+  testthat::skip_on_cran()
   td <- fioRa::test_data
-  x <- setNames(data.frame(
+  x <- stats::setNames(data.frame(
     t(sapply(td[2:11], function(x) { strsplit(x, ",")[[1]] }))),
     strsplit(td[1], ",")[[1]]
   )
@@ -13,7 +14,8 @@ testthat::test_that("fioRa `run_script` function works with default parameters",
 })
 
 testthat::test_that("fioRa `run_script` function returns annotated spectra output", {
-  skip_if(Sys.getenv("CI") == "true", "Skipping test on CI because python installation is missing there")
+  testthat::skip_on_ci()
+  testthat::skip_on_cran()
   td <- fioRa::test_data
   x <- setNames(data.frame(
     t(sapply(td[2:11], function(x) { strsplit(x, ",")[[1]] }))),

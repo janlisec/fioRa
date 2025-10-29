@@ -22,10 +22,11 @@
 #'     You can try different installed version of `fiora` by providing the path
 #'     the the script explicitly.
 #'
-#' @return A list with the fiora results for the specified compound.
+#' @return A list with the fiora results for the specified compound(s).
 #'
 #' @examples
 #' \dontrun{
+#'   # !!! running this example will install the python module `fiora`
 #'   td <- fioRa::test_data
 #'   x <- setNames(data.frame(
 #'     t(sapply(td[2:11], function(x) { strsplit(x, ",")[[1]] }))),
