@@ -48,16 +48,16 @@ jobs:
 
       - name: Install Miniconda via reticulate
         run: |
-          Rscript -e "reticulate::install_miniconda(update = FALSE, force = FALSE)"
+          Rscript -e 'reticulate::install_miniconda(update = FALSE, force = FALSE)'
 
       - name: Create and install Python virtualenv 'fiora'
         run: |
-          Rscript -e "reticulate::virtualenv_create('fiora')"
-          Rscript -e \"reticulate::virtualenv_install('fiora', packages = 'git+https://github.com/BAMeScience/fiora.git')\"
+          Rscript -e 'reticulate::virtualenv_create("fiora")'
+          Rscript -e 'reticulate::virtualenv_install("fiora", packages = "git+https://github.com/BAMeScience/fiora.git")'
 
       - name: Set reticulate to use virtualenv 'fiora'
         run: |
-          Rscript -e "reticulate::use_virtualenv('fiora', required = TRUE)"
+          Rscript -e 'reticulate::use_virtualenv("fiora", required = TRUE)'
 
       - uses: r-lib/actions/check-r-package@v2
         with:
