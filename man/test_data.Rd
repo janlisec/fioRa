@@ -3,7 +3,7 @@
 \docType{data}
 \name{test_data}
 \alias{test_data}
-\title{An example set of data collected for a CRM.}
+\title{The example set of test compounds provided with FIORA.}
 \format{
 A character vector of length = 12 containing the readLines equivalent
     of a fiora input file in csv format, with header, 10 example compounds,
@@ -11,12 +11,12 @@ A character vector of length = 12 containing the readLines equivalent
     respectively).
 }
 \source{
-jan.lisec@bam.de
+https://github.com/BAMeScience/fiora/blob/main/examples/example_input.csv
 }
 \usage{
 data(test_data)
 }
 \description{
-An example set of data collected for a CRM.
+The example set of test compounds provided with FIORA.
 }
 \keyword{datasets}

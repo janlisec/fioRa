@@ -1,11 +1,14 @@
 Package: fioRa
 Title: Mass-Spectra Prediction Using the FIORA Model
 Version: 0.3.4
-Date: 2025-10-29
+Date: 2025-11-03
 Authors@R: 
     person("Jan", "Lisec", , "jan.lisec@bam.de", role = c("aut", "cre"))
-Description: Provides a wrapper for the python module `FIORA` as well as a `Shiny`-App 
-    to facilitate data processing and visualization.
+Description: Provides a wrapper for the python module 'FIORA' as well as a 
+    'shiny'-App to facilitate data processing and visualization. 'FIORA' allows 
+    to predict Mass-Spectra based on the SMILES code of chemical compounds. It 
+    is described in the Nature Communications article by Nowatzky (2025) 
+    <doi:10.1038/s41467-025-57422-4>.
 License: MIT + file LICENSE
 Imports: 
     bslib,

@@ -41,6 +41,7 @@ read_fiora <- function(fl, fmt = c("list","df")) {
       s <- paste(mz[ord], int[ord], sep=":", collapse=" ")
     } else {
       if (ncol(s)==3) {
+        verify_suggested(pkg = "rcdk")
         s <- as.data.frame(s)
         s[,1:2] <- apply(s[,1:2], 2, as.numeric)
         tmp <- strsplit(s[,3], "//")

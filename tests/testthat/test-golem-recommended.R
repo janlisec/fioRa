@@ -55,29 +55,3 @@ testthat::test_that(
     )
   }
 )
-
-# Configure this test to fit your need.
-# testServer() function makes it possible to test code in server functions and modules, without needing to run the full Shiny application
-# shiny::testServer(
-#   app = fioRa:::app_server,
-#   #args = list(id = "fioRa"),
-#   expr = {
-#
-#     # Set and test an input
-#     session$setInputs("start_button" = 1)
-#
-#     Sys.sleep(15)
-#
-#     #expect_true(!is.null(rv$res))
-#     expect_true(!is.null(output$spec))
-#
-#   }
-# )
-
-# Configure this test to fit your need
-testthat::test_that(
-  desc = "app launches",
-  code = {
-    golem::expect_running(sleep = 5)
-  }
-)

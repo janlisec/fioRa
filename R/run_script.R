@@ -25,7 +25,7 @@
 #' @return A list with the fiora results for the specified compound(s).
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #'   # !!! running this example will install the python module `fiora`
 #'   td <- fioRa::test_data
 #'   x <- setNames(data.frame(
