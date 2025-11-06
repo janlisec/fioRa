@@ -37,25 +37,21 @@ install.packages("devtools")
 devtools::install_github("janlisec/fioRa")
 ```
 
-Before first use you need to set up a python installation and a virtual
+Before first use you need to set up a python installation and a conda
 environment *fiora* which can be achieved from within R with the help of
-the `reticulate` package.
+the `reticulate` package and a convenience function.
 
 ``` r
-# [1] install R package reticulate if you haven't done yet
-install.packages("reticulate")
-
-# [2] install python (miniconda) if you haven't done yet
-if (!file.exists(reticulate::miniconda_path())) {
-  reticulate::install_miniconda(path = reticulate::miniconda_path(), update = FALSE, force = FALSE)
-}
-
-# [3] install python module fiora in a conda environment and activate
-if (!("fiora" %in% reticulate::conda_list()$name)) {
-  reticulate::conda_create("fiora")
-  reticulate::conda_install("fiora", packages = "git+https://github.com/BAMeScience/fiora.git", pip = TRUE)
-  reticulate::use_condaenv("fiora", required = TRUE)
-}
+fioRa::install_fiora()
+#> No valid 'default_path' provided, using reticulate::miniconda_path 'C:/Users/jlisec/AppData/Local/r-miniconda'.
+#> $os
+#> [1] "Windows"
+#> 
+#> $python
+#> [1] "C:\\Users\\jlisec\\AppData\\Local\\r-miniconda\\envs\\fiora\\python.exe"
+#> 
+#> $script
+#> [1] "C:\\Users\\jlisec\\AppData\\Local\\r-miniconda\\envs\\fiora\\Scripts\\fiora-predict"
 ```
 
 ## Run
@@ -87,7 +83,7 @@ x <- data.frame(
   Instrument_type = "HCD"
 )
 fioRa::run_script(x = x, annotation = TRUE)
-#> No valid default_path provided, using reticulate::miniconda_path.
+#> No valid 'default_path' provided, using reticulate::miniconda_path 'C:/Users/jlisec/AppData/Local/r-miniconda'.
 #> $Example_0
 #> $Example_0$TITLE
 #> [1] "Example_0"
@@ -123,5 +119,5 @@ fioRa::run_script(x = x, annotation = TRUE)
 
 ## About
 
-You are reading the doc about version 0.3.4 compiled on 2025-10-29
-14:50:35.100545.
+You are reading the doc about version 0.3.4 compiled on 2025-11-03
+11:24:08.729794.

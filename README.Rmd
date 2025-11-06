@@ -49,7 +49,7 @@ Before first use you need to set up a python installation and a conda
 environment *fiora* which can be achieved from within R with the help of 
 the `reticulate` package and a convenience function.
 
-```{r py_setup, eval = FALSE}
+```{r py_setup, eval = TRUE}
 fioRa::install_fiora()
 ```
 

@@ -17,7 +17,8 @@ This function will check and perform the installation of three
     is a prerequisite for both, \link{run_app} and \link{run_script}.
 }
 \examples{
-\donttest{
+\dontrun{
+  # this will install packages and software on your machine
   install_fiora()
 }
 

@@ -9,7 +9,8 @@
 #'     python executable and the fiora script.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
+#'   # this will install packages and software on your machine
 #'   install_fiora()
 #' }
 #'

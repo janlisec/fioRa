@@ -46,7 +46,7 @@ This wrapper will generate a fiora ready input file (csv-format)
     the the script explicitly.
 }
 \examples{
-\donttest{
+\dontrun{
   # !!! running this example will install the python module `fiora`
   td <- fioRa::test_data
   x <- setNames(data.frame(
