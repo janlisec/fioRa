@@ -85,15 +85,6 @@ selectInputWithButtonsServer <- function(id, choices, default = NULL) {
     selected <- shiny::reactiveVal(default)
     idx <- shiny::reactiveVal()
 
-    # helper
-    estimateSelectWidth <- function(choices, min_width = 120, max_width = 300, px_per_char = 8) {
-      if (length(choices) == 0) return(paste0(min_width, "px"))
-      max_chars <- max(nchar(choices), na.rm = TRUE)
-      estimated <- 10 + 16 + (max_chars * px_per_char)
-      width <- min(max(estimated, min_width), max_width)
-      paste0(width, "px")
-    }
-
     shiny::observeEvent(choices(), {
       shiny::updateSelectInput(session, inputId = "input", choices = choices(), selected = choices()[1])
       session$sendCustomMessage("setSelectWidth", list(id = session$ns("input_div"), width = estimateSelectWidth(choices())))
@@ -101,7 +92,6 @@ selectInputWithButtonsServer <- function(id, choices, default = NULL) {
 
     shiny::observeEvent(input$input, {
       req(choices())
-      #browser()
       index <- match(input$input, choices())
       if (!is.na(index)) {
         shinyjs::toggleState("up", condition = index > 1)
@@ -111,19 +101,11 @@ selectInputWithButtonsServer <- function(id, choices, default = NULL) {
     }, ignoreNULL = TRUE)
 
     shiny::observeEvent(input$up, {
-      current_choices <- choices()
-      index <- match(input$input, current_choices)
-      if (!is.na(index) && index > 1) {
-        updateSelectInput(session, "input", selected = current_choices[index - 1])
-      }
+      updateSelectInput(session, "input", selected = next_choice(input$input, choices(), "up"))
     })
 
     shiny::observeEvent(input$down, {
-      current_choices <- choices()
-      index <- match(input$input, current_choices)
-      if (!is.na(index) && index < length(current_choices)) {
-        updateSelectInput(session, "input", selected = current_choices[index + 1])
-      }
+      updateSelectInput(session, "input", selected = next_choice(input$input, choices(), "down"))
     })
 
     return(selected)

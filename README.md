@@ -7,6 +7,8 @@
 
 [![Static
 Badge](https://img.shields.io/badge/LiveApp-blue)](https://apps.bam.de/shn01/fioRa/)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/fioRa)](https://CRAN.R-project.org/package=fioRa)
 [![R-CMD-check](https://github.com/janlisec/fioRa/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/janlisec/fioRa/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/janlisec/fioRa/graph/badge.svg)](https://app.codecov.io/gh/janlisec/fioRa)
@@ -119,5 +121,5 @@ fioRa::run_script(x = x, annotation = TRUE)
 
 ## About
 
-You are reading the doc about version 0.3.4 compiled on 2025-11-03
-11:24:08.729794.
+You are reading the doc about version 0.3.4 compiled on 2025-11-11
+14:48:03.385989.

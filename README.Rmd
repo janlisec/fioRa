@@ -17,6 +17,7 @@ output: github_document
 
 <!-- badges: start -->
 [![Static Badge](https://img.shields.io/badge/LiveApp-blue)](https://apps.bam.de/shn01/fioRa/)
+[![CRAN status](https://www.r-pkg.org/badges/version/fioRa)](https://CRAN.R-project.org/package=fioRa)
 [![R-CMD-check](https://github.com/janlisec/fioRa/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/janlisec/fioRa/actions/workflows/R-CMD-check.yaml)
 [![Codecov test coverage](https://codecov.io/gh/janlisec/fioRa/graph/badge.svg)](https://app.codecov.io/gh/janlisec/fioRa)
 [![Static Badge](https://img.shields.io/badge/doi-10.1038/s41467--025--57422--4-yellow.svg)](https://doi.org/10.1038/s41467-025-57422-4)

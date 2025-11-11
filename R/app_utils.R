@@ -287,3 +287,48 @@ ldply_base <- function(.data, .fun = identity) {
   df <- data.frame(df, row.names = NULL, check.names = FALSE)
   return(df)
 }
+
+#' @title estimateSelectWidth
+#' @param choices choices
+#' @param min_width min_width
+#' @param max_width max_width
+#' @param px_per_char px_per_char
+#' @examples
+#' choices <- NULL
+#' estimateSelectWidth(choices)
+#' estimateSelectWidth(choices, min_width = 80)
+#' choices <- c("", "A", "very long choice")
+#' estimateSelectWidth(choices, px_per_char = 12)
+#' estimateSelectWidth(choices, px_per_char = 12, max_width = 200)
+#'
+#' @keywords internal
+#' @noRd
+estimateSelectWidth <- function(choices, min_width = 120, max_width = 300, px_per_char = 8) {
+  if (length(choices) == 0) return(paste0(min_width, "px"))
+  max_chars <- max(nchar(choices), na.rm = TRUE)
+  estimated <- 10 + 16 + (max_chars * px_per_char)
+  width <- min(max(estimated, min_width), max_width)
+  paste0(width, "px")
+}
+
+#' @title next_choice
+#' @param current current
+#' @param choices choices
+#' @param direction direction
+#' @keywords internal
+#' @noRd
+next_choice <- function(current, choices, direction = c("up", "down")) {
+  direction <- match.arg(direction)
+  index <- match(current, choices)
+
+  if (is.na(index)) return(current)  # current not in choices
+
+  if (direction == "up" && index > 1) {
+    return(choices[index - 1])
+  }
+  if (direction == "down" && index < length(choices)) {
+    return(choices[index + 1])
+  }
+
+  return(current)
+}

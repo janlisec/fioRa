@@ -1,3 +1,8 @@
+# v0.3.5 by jan.lisec@bam.de
+
+* CRAN badge
+* modified module of selectInputWithButtons to be better tested
+
 # v0.3.4 by jan.lisec@bam.de
 
 * App GUI improved (better selection of individual results)
