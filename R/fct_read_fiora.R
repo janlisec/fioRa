@@ -1,11 +1,12 @@
-#' @title Read a fiora result file (mgf) into a R list object.
+#' @title Read a fiora result file (mgf) into a R object.
 #'
 #' @param fl file.
-#' @param fmt Set fmt to 'df' to simplify the return value to a data frame (named
-#'     list otherwise).
+#' @param fmt A named list object is returned if not specified otherwise. Set 'fmt=df'
+#'     to simplify the return value to a data frame. Use 'fmt=Spectra' to convert to
+#'     a [Spectra::Spectra()] object.
 #'
 #' @description Allows to import a `fioRa` output file (msp like format) to a list
-#'     like format or simplified to a data frame.
+#'     like format or simplified to a data frame or Spectra object.
 #'
 #' @return A result list of length = n_compounds containing metadata fields as
 #'     sub-lists and the predicted MS^2 spectrum as sub-list `spec`. You can set
@@ -13,9 +14,18 @@
 #'     to a data frame row (spectra will be encoded as 'mz1:int1 mz2:int2 ...'
 #'     and information regarding SMILES, adduct or formula per peak will be lost).
 #'
-#' @keywords internal
-#' @noRd
-read_fiora <- function(fl, fmt = c("list","df")) {
+#' @examples
+#' fl <- system.file("extdata/annotated_output.mgf", package = "fioRa")
+#' # read as a list
+#' fioRa::read_fiora(fl = fl)
+#' # read as data.frame
+#' str(fioRa::read_fiora(fl = fl, fmt = "df"))
+#' # read as Spectra object
+#' fioRa::read_fiora(fl = fl, fmt = "Spectra")
+#'
+#' @export
+#' @seealso [Spectra::Spectra()]
+read_fiora <- function(fl, fmt = c("list", "df", "Spectra")) {
   fmt <- match.arg(fmt)
   x <- readLines(fl)
   i <- which(x=="BEGIN IONS")
@@ -62,6 +72,9 @@ read_fiora <- function(fl, fmt = c("list","df")) {
     out <- ldply_base(out, unlist)
     out[,"PRECURSOR_MZ"] <- round(as.numeric(out[,"PRECURSOR_MZ"]),4)
     out[,"COLLISIONENERGY"] <- as.numeric(out[,"COLLISIONENERGY"])
+  }
+  if (fmt == "Spectra") {
+    out <- convert2Spectra(out)
   }
   return(out)
 }

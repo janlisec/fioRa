@@ -4,7 +4,10 @@
 \alias{install_fiora}
 \title{Install the python module `fiora` into a conda environment.}
 \usage{
-install_fiora()
+install_fiora(conda_name = "fiora")
+}
+\arguments{
+\item{conda_name}{The name of the conda environment where fiora shall be installed to.}
 }
 \value{
 A list providing the current OS and path information on the current

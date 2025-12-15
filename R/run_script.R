@@ -7,7 +7,9 @@
 #' @param annotation Return SMILES for fragments if TRUE.
 #' @param fiora_script Path to python script fiora-predict.
 #' @param fmt Set fmt to 'df' to simplify the return value to a data frame (named
-#'     list otherwise).
+#'     list otherwise). You may also use 'file_only' to omit output to the console
+#'     if you specify a valid path in 'file_out'.
+#' @param file_out Specify a path to a file to store the FIORA result permanently.
 #'
 #' @description A wrapper around the python script `fiora-predict` using the
 #'     fiora open source model to generate a MS^2 spectra for a compound with
@@ -17,8 +19,8 @@
 #'     based on the user parameters which is stored as a temp file. It will
 #'     ensure that the current version of the fiora package is installed in a
 #'     respective python environment. It will use `system2()` to run the python
-#'     script `fiora-predict` and import its result back into R using the
-#'     internal function `read_fiora()`.
+#'     script `fiora-predict` and import its result back into R using function
+#'     `read_fiora()`.
 #'     You can try different installed version of `fiora` by providing the path
 #'     the the script explicitly.
 #'
@@ -37,8 +39,16 @@
 #'   # modify parameters
 #'   run_script(x = x[1,,drop=FALSE], min_prob = 0.05)
 #'
+#'   # you may also return a Spectra object
+#'   run_script(x = x[1,,drop=FALSE], min_prob = 0.05, annotation = TRUE, fmt = "Spectra")
+#'
 #'   # use a different fiora environment/model
 #'   s_pth <- "c:/Users/jlisec/AppData/Local/r-miniconda/envs/fiora-0.1.0/Scripts/fiora-predict"
+#'
+#'   # this setup will be used internally
+#'   fioRa:::find_fiora_predict_paths(default_path = dirname(s_pth), script_name = basename(s_pth))
+#'
+#'   # run the script
 #'   foo2 <- run_script(x = x, fiora_script = s_pth)
 #'
 #'   foo2[[1]][["spec"]]
@@ -49,6 +59,7 @@
 #'     print(foo[[i]][["spec"]])
 #'     print(foo2[[i]][["spec"]])
 #'   }
+#'
 #' }
 #'
 #' @export
@@ -63,7 +74,8 @@ run_script <- function(
     min_prob = 0.001,
     annotation = FALSE,
     fiora_script = NULL,
-    fmt = c("list","df")
+    fmt = c("list","df","Spectra","file_only"),
+    file_out = NULL
 ) {
   fmt <- match.arg(fmt)
   # get path of python.exe and fiora_predict script
@@ -100,9 +112,17 @@ run_script <- function(
     msg <- system2(command = fioRa_pth$script, args = args)
   }
 
-  # read result
+  # read (or copy) result
   if (msg==0) {
-    read_fiora(fl = temp_output_file, fmt = fmt)
+    if (is_valid_path(file_out)) {
+      # copy output file to specified destination
+      file.copy(from = temp_output_file, to = file_out, overwrite = TRUE)
+    }
+    if (fmt == "file_only") {
+      invisible(file_out)
+    } else {
+      read_fiora(fl = temp_output_file, fmt = fmt)
+    }
   } else {
     msg
   }

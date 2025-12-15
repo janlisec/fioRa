@@ -188,7 +188,7 @@ cce <- InterpretMSSpectrum::CountChemicalElements
 #' @details More information about aromaticity: \url{https://github.com/CDK-R/cdkr/issues/49}
 #' @examples
 #' fl <- system.file("extdata/annotated_output.mgf", package = "fioRa")
-#' tmp <- fioRa:::read_fiora(fl = fl)
+#' tmp <- fioRa::read_fiora(fl = fl)
 #' s <- tmp[[1]][["spec"]]
 #' plot_spec(s = s)
 #' @return Returns a plot.
@@ -222,6 +222,49 @@ plot_spec <- function(s, show_neutral_losses = TRUE, ...) {
   for (i in flt) {
     renderSMILES(smiles = s[i,"SMILES"], coords = square_subplot_coord(x = s[i,"mz"], y = s[i,"int"], w = 0.2))
   }
+}
+
+#' @title convert2Spectra.
+#' @description Convert a FIORA result to Spectra format.
+#' @param sp FIORA result with Annotation=TRUE.
+#' @return A named list.
+#' @keywords internal
+#' @noRd
+convert2Spectra <- function(sp) {
+  verify_suggested(pkg = c("S4Vectors", "Spectra"))
+  sp.l <- length(sp)
+  msLevel <- rep(2L, sp.l)
+  centroided <- rep(TRUE, sp.l)
+  adduct <- sapply(1:sp.l, FUN = function(x) {sp[[x]]$PRECURSORTYPE})
+  polarity <- as.integer(grepl("]+", adduct, fixed = TRUE))
+  name <- sapply(1:sp.l, FUN = function(x) {sp[[x]]$TITLE})
+  smiles <- sapply(1:sp.l, FUN = function(x) {sp[[x]]$SMILES})
+  formula <- sapply(1:sp.l, FUN = function(x) {sp[[x]]$FORMULA})
+  precursorMz <- as.numeric(sapply(1:sp.l, FUN = function(x) {sp[[x]]$PRECURSOR_MZ}))
+  collisionEnergy <- as.integer(as.numeric(sapply(1:sp.l, FUN = function(x) {sp[[x]]$COLLISIONENERGY})))
+  collisionMethod <- sapply(1:sp.l, FUN = function(x) {sp[[x]]$INSTRUMENTTYPE})
+
+  spd <- S4Vectors::DataFrame(
+    msLevel,
+    centroided,
+    adduct,
+    polarity,
+    name,
+    smiles,
+    formula,
+    precursorMz,
+    collisionEnergy,
+    collisionMethod
+  )
+
+  ## Assign m/z and intensity values.
+  spd$mz <- lapply(1:sp.l, FUN = function(x) sp[[x]]$spec$mz)
+  spd$intensity <- lapply(1:sp.l, FUN = function(x) sp[[x]]$spec$int)
+  spd$fragment.smiles <- lapply(1:sp.l, FUN = function(x) sp[[x]]$spec$SMILES)
+  spd$fragment.adduct <- lapply(1:sp.l, FUN = function(x) sp[[x]]$spec$adduct)
+  spd$fragment.formula <- lapply(1:sp.l, FUN = function(x) sp[[x]]$spec$formula)
+
+  return(Spectra::Spectra(spd))
 }
 
 #' @title find_fiora_predict_paths.
@@ -331,4 +374,17 @@ next_choice <- function(current, choices, direction = c("up", "down")) {
   }
 
   return(current)
+}
+
+#' @title is_valid_path
+#' @param x x.
+#' @keywords internal
+#' @noRd
+is_valid_path <- function(x) {
+  if (!is.character(x) || length(x) != 1L || is.na(x)) return(FALSE)
+  if (!nzchar(x) || grepl("^\\s+$", x)) return(FALSE)
+  tryCatch({
+    suppressWarnings(normalizePath(x, winslash = "/", mustWork = FALSE))
+    TRUE
+  }, error = function(e) FALSE)
 }

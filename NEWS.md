@@ -1,3 +1,11 @@
+# v0.3.6 by jan.lisec@bam.de
+
+* `read_fiora()` now exported function
+* result can be converted to object of class `Spectra` (see Spectra package)
+* result can be written to a file path only (no console output)
+* parallel conda environments for different FIORA versions are now supported by
+  using the `conda_name` parameter in `install_fiora()`
+
 # v0.3.5 by jan.lisec@bam.de
 
 * CRAN badge

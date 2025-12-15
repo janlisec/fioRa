@@ -1,6 +1,6 @@
 testthat::test_that("fioRa can read the standard fiora example output mgf", {
   fl <- system.file("extdata/expected_output.mgf", package = "fioRa")
-  tmp <- fioRa:::read_fiora(fl = fl)
+  tmp <- fioRa::read_fiora(fl = fl)
   # return value is a list
   testthat::expect_true(is.list(tmp))
   # return value is of length=10
@@ -14,7 +14,7 @@ testthat::test_that("fioRa can read the standard fiora example output mgf", {
 
 testthat::test_that("fioRa can read the standard fiora example annotated output mgf", {
   fl <- system.file("extdata/annotated_output.mgf", package = "fioRa")
-  tmp <- fioRa:::read_fiora(fl = fl)
+  tmp <- fioRa::read_fiora(fl = fl)
   # return value is a list
   testthat::expect_true(is.list(tmp))
   # return value is of length=10
@@ -29,11 +29,20 @@ testthat::test_that("fioRa can read the standard fiora example annotated output 
 
 testthat::test_that("fioRa can read the standard fiora example annotated output mgf and combine output into data frame", {
   fl <- system.file("extdata/annotated_output.mgf", package = "fioRa")
-  tmp <- fioRa:::read_fiora(fl = fl, fmt = "df")
+  tmp <- fioRa::read_fiora(fl = fl, fmt = "df")
   # return value is a data.frame
   testthat::expect_true(is.data.frame(tmp))
   # column "spec" is present
   testthat::expect_true("spec" %in% colnames(tmp))
   # column "spec" contains mz:int pairs
   #testthat::expect_true(all(tmp[,"spec"]))
+})
+
+testthat::test_that("fioRa can read the standard fiora example annotated output mgf as Spectra format", {
+  fl <- system.file("extdata/annotated_output.mgf", package = "fioRa")
+  tmp <- fioRa::read_fiora(fl = fl, fmt = "Spectra")
+  # return value is a Spectra object
+  testthat::expect_true(inherits(tmp, "Spectra"))
+  # 10 spectra are contained in the object
+  testthat::expect_true(length(tmp)==10L)
 })
