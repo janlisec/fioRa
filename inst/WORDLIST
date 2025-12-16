@@ -18,9 +18,13 @@ hardcoded
 https
 io
 md
+mgf
 miniconda
+msp
+mz
 readLines
 reticulate
+selectInputWithButtons
 shinyApp
 shinyapps
 silico

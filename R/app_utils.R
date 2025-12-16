@@ -278,13 +278,13 @@ find_fiora_predict_paths <- function(
     default_path = "/home/shiny_test/miniforge3",
     script_name = "fiora-predict"
 ) {
-  # Hilfsfunktion zur Pfadprüfung
+  # check if path is valid
   is_valid_path <- function(path) { !is.null(path) && file.exists(path) }
 
   # current OS
   os <- Sys.info()[["sysname"]]
 
-  # Wenn default_path ungültig verwende reticulate::miniconda_path()
+  # if default_path is invalid try using reticulate::miniconda_path()
   if (!is_valid_path(default_path)) {
     verify_suggested("reticulate")
     default_path <- reticulate::miniconda_path()
@@ -295,7 +295,6 @@ find_fiora_predict_paths <- function(
     }
   }
 
-  #
   if (os == "Windows") {
     # check if default path includes specific environment already and guess environment if not
     win_path_ele <- strsplit(normalizePath(default_path), "[\\]")[[1]]
@@ -307,7 +306,7 @@ find_fiora_predict_paths <- function(
     python_path <- file.path(default_path, "python.exe")
     script_path <- file.path(default_path, "Scripts", script_name)
   } else {
-    default_path <- file.path(default_path, "envs", "fiora", "bin")
+    if (!grepl("envs", default_path)) { default_path <- file.path(default_path, "envs", "fiora", "bin") }
     python_path <- file.path(default_path, "python")
     script_path <- file.path(default_path, script_name)
   }
