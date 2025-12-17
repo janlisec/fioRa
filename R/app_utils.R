@@ -271,12 +271,14 @@ convert2Spectra <- function(sp) {
 #' @description Determin current OS, python installation path and script path and return all 3 as a named list.
 #' @param default_path Default base path of python installation.
 #' @param script_name script_name.
+#' @param verbose Set to FALSE to omit messages.
 #' @return A named list.
 #' @keywords internal
 #' @noRd
 find_fiora_predict_paths <- function(
     default_path = "/home/shiny_test/miniforge3",
-    script_name = "fiora-predict"
+    script_name = "fiora-predict",
+    verbose = TRUE
 ) {
   # check if path is valid
   is_valid_path <- function(path) { !is.null(path) && file.exists(path) }
@@ -291,7 +293,7 @@ find_fiora_predict_paths <- function(
     if (!is_valid_path(default_path)) {
       stop("No valid 'default_path' provided and no valid reticulate::miniconda_path")
     } else {
-      message("No valid 'default_path' provided, using reticulate::miniconda_path '", default_path, "'.")
+      if (verbose) message("No valid 'default_path' provided, using reticulate::miniconda_path '", default_path, "'.")
     }
   }
 

@@ -11,7 +11,8 @@ run_script(
   annotation = FALSE,
   fiora_script = NULL,
   fmt = c("list", "df", "Spectra", "file_only"),
-  file_out = NULL
+  file_out = NULL,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -30,6 +31,8 @@ list otherwise). You may also use 'file_only' to omit output to the console
 if you specify a valid path in 'file_out'.}
 
 \item{file_out}{Specify a path to a file to store the FIORA result permanently.}
+
+\item{verbose}{Set to FALSE to omit messages.}
 }
 \value{
 A list with the fiora results for the specified compound(s).

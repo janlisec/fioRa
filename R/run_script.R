@@ -10,6 +10,7 @@
 #'     list otherwise). You may also use 'file_only' to omit output to the console
 #'     if you specify a valid path in 'file_out'.
 #' @param file_out Specify a path to a file to store the FIORA result permanently.
+#' @param verbose Set to FALSE to omit messages.
 #'
 #' @description A wrapper around the python script `fiora-predict` using the
 #'     fiora open source model to generate a MS^2 spectra for a compound with
@@ -75,7 +76,8 @@ run_script <- function(
     annotation = FALSE,
     fiora_script = NULL,
     fmt = c("list","df","Spectra","file_only"),
-    file_out = NULL
+    file_out = NULL,
+    verbose = TRUE
 ) {
   fmt <- match.arg(fmt)
   # get path of python.exe and fiora_predict script
@@ -88,11 +90,12 @@ run_script <- function(
     script_name <- "fiora-predict"
   }
 
-  fioRa_pth <- find_fiora_predict_paths(default_path = default_path, script_name = script_name)
+  fioRa_pth <- find_fiora_predict_paths(default_path = default_path, script_name = script_name, verbose = verbose)
 
   # get input/output files, write data
   temp_input_file <- tempfile(fileext = ".csv")
   temp_output_file <- gsub("csv$", "mgf", temp_input_file)
+  on.exit(unlink(x = c(temp_input_file, temp_output_file), force = TRUE))
   stopifnot(is.data.frame(x))
   stopifnot(all(c("Name","SMILES","Precursor_type","CE","Instrument_type") %in% colnames(x)))
   tmp_data <- c(
@@ -104,12 +107,13 @@ run_script <- function(
   args <- c(paste0('-i \"', temp_input_file, '\"'), paste0('-o \"', temp_output_file, '\"'))
   if (annotation) args <- c(args, "--annotation")
   if (is.numeric(min_prob)) args <- c(args, paste0('--min_prob ', min_prob))
+  if (verbose) stdout <- "" else stdout <- NULL
 
   # process with args
   if (fioRa_pth$os == "Windows") {
-    msg <- system2(command = fioRa_pth$python, args = c(fioRa_pth$script, args))
+    msg <- system2(command = fioRa_pth$python, args = c(fioRa_pth$script, args), stdout = stdout)
   } else {
-    msg <- system2(command = fioRa_pth$script, args = args)
+    msg <- system2(command = fioRa_pth$script, args = args, stdout = stdout)
   }
 
   # read (or copy) result

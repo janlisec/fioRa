@@ -26,12 +26,19 @@ Allows to import a `fioRa` output file (msp like format) to a list
 }
 \examples{
 fl <- system.file("extdata/annotated_output.mgf", package = "fioRa")
-# read as a list
-fioRa::read_fiora(fl = fl)
-# read as data.frame
+
+# read as data.frame (return a simplified version)
 str(fioRa::read_fiora(fl = fl, fmt = "df"))
-# read as Spectra object
-fioRa::read_fiora(fl = fl, fmt = "Spectra")
+
+\donttest{
+  # read as a list (standard case)
+  fioRa::read_fiora(fl = fl)
+
+  # read as Spectra object (requires Spectra-package)
+  if (requireNamespace("Spectra", quietly = TRUE)) {
+    fioRa::read_fiora(fl = fl, fmt = "Spectra")
+   }
+}
 
 }
 \seealso{
