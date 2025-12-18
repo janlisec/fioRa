@@ -62,10 +62,12 @@ testthat::test_that(
     fl <- system.file("extdata/annotated_output.mgf", package = "fioRa")
     tmp <- fioRa::read_fiora(fl = fl)
     s <- tmp[[1]][["spec"]]
-    pdf(NULL)
     vdiffr::expect_doppelganger(
       title = "plot_spec Standard",
-      fig = function() fioRa:::plot_spec(s = s)
+      fig = function() {
+        pdf(NULL)
+        fioRa:::plot_spec(s = s)
+      }
     )
   }
 )
