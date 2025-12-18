@@ -31,9 +31,34 @@ jobs:
         run: |
           Rscript -e 'reticulate::install_miniconda(update = FALSE, force = FALSE)'
 
-      - name: Create and install Python conda env 'fiora'
+      - name: Free disk space on Ubuntu runner
+        if: runner.os == 'Linux'
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/kou/arrow/e49d8ae15583ceff03237571569099a6ad62be32/ci/scripts/util_free_space.sh | bash
+      # source: https://www.dzombak.com/blog/2024/09/freeing-disk-space-on-github-actions-runners/
+
+      - name: Create empty conda env 'fiora'
         run: |
           Rscript -e 'reticulate::conda_create("fiora")'
+
+      - name: Preinstall CPU-only PyTorch and fiora (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          # reticulate-Miniforge path (may be different in GitHub Actions)
+          CONDA_BIN="${HOME}/.local/share/r-miniconda/bin/conda"
+          "$CONDA_BIN" run -n fiora python -m pip install --upgrade pip
+          # CPU-Only Wheels (no CUDA-Runtime):
+          "$CONDA_BIN" run -n fiora python -m pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision torchaudio
+          # fiora from Git-Repo WITHOUT requirements.txt
+          "$CONDA_BIN" run -n fiora python -m pip install git+https://github.com/BAMeScience/fiora.git
+          # pin reticulate to this env
+          Rscript -e 'reticulate::use_condaenv("fiora", required = TRUE)'
+      # source: https://pytorch.org/get-started/locally/)[2](https://github.com/pytorch/pytorch/issues/146786
+
+      - name: Install fiora (macOS/Windows)
+        if: runner.os != 'Linux'
+        run: |
           Rscript -e 'reticulate::conda_install("fiora", packages = "git+https://github.com/BAMeScience/fiora.git", pip = TRUE)'
           Rscript -e 'reticulate::use_condaenv("fiora", required = TRUE)'
 
