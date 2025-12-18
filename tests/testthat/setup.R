@@ -11,7 +11,7 @@ clean_python_tmp_dir <- function() {
       full.names = TRUE
     )
     #message("Cleaning up detritus: ", paste(basename(detritus), collapse=", "))
-    unlink(detritus, force = TRUE)
+    unlink(detritus, force = TRUE, recursive = TRUE)
   }
 }
 

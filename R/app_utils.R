@@ -9,7 +9,7 @@ verify_suggested <- function(pkg) {
   check_pkg <- sapply(pkg, requireNamespace, quietly = TRUE)
   if (!all(check_pkg)) {
     msg <- paste0(
-      "The use of this function requires package", ifelse(sum(!check_pkg)>1, "s", ""),
+      "The use of this function requires package", ifelse(sum(!check_pkg)>1, "s ", " "),
       paste(names(check_pkg)[!check_pkg], collapse=", "),
       ". Please install."
     )
@@ -160,7 +160,7 @@ square_subplot_coord <- function(x, y, w = 0.2) {
 add_adduct <- function(fml, ad) {
   possible_adds <- stats::setNames(c(0,0,-1*(1:3),1:3,-1*(1:3),1:3), gsub("1", "", c("[M]-", "[M]+", paste0("[M-",1:3,"H]-"), paste0("[M+",1:3,"H]-"), paste0("[M-",1:3,"H]+"), paste0("[M+",1:3,"H]+"))))
   if(!(ad %in% names(possible_adds))) {
-    message("Dont know this adduct definition", ad)
+    message("Dont know this adduct definition ", ad)
     stop()
   }
   fml_ad <- cce(fml)

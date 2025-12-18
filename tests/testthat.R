@@ -8,6 +8,5 @@
 
 library(testthat)
 library(fioRa)
-library(shiny)
 
-test_check("fioRa")
+testthat::test_check("fioRa")
