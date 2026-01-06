@@ -30,6 +30,7 @@ testthat::test_that(
   code = {
     long_string <- paste(LETTERS, collapse="")
     out_exp <- paste0(10+16+nchar(long_string)*8, "px")
+    testthat::expect_equal(fioRa:::estimateSelectWidth(NULL), "120px")
     testthat::expect_equal(fioRa:::estimateSelectWidth(c("1","2")), "120px")
     testthat::expect_equal(fioRa:::estimateSelectWidth(c("1", long_string)), out_exp)
     testthat::expect_equal(fioRa:::estimateSelectWidth(c("1", long_string), max_width = 160), "160px")
@@ -49,10 +50,16 @@ testthat::test_that(
         fioRa:::renderSMILES(smiles, kekulise=FALSE)
       }
     )
-    # vdiffr::expect_doppelganger(
-    #   title = "renderSMILES kekulise=TRUE",
-    #   fig = function() fioRa:::renderSMILES(smiles, kekulise=TRUE)
-    # )
+    vdiffr::expect_doppelganger(
+      title = "renderSMILES kekulise=TRUE",
+      fig = function() {
+        pdf(NULL)
+        smiles <- "OS(=O)(=O)c1ccc(cc1)C(CC(=O)O)CC(=O)O"
+        plot.new()
+        plot.window(xlim=c(0,200), ylim=c(0,100))
+        fioRa:::renderSMILES(smiles, kekulise=TRUE)
+      }
+    )
   }
 )
 

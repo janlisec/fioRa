@@ -64,7 +64,8 @@ read_fiora <- function(fl, fmt = c("list", "df", "Spectra")) {
         tmp <- strsplit(s[,3], "//")
         s$adduct <- sapply(tmp, function(z) { z[2] }, USE.NAMES = FALSE)
         s$SMILES <- sapply(tmp, function(z) { z[1] }, USE.NAMES = FALSE)
-        s$formula <- sapply(s$SMILES, function(z) { smiles2formula(z) }, USE.NAMES = FALSE)
+        #s$formula <- sapply(s$SMILES, function(z) { smiles2formula(z) }, USE.NAMES = FALSE)
+        s$formula <- smiles2formula(s$SMILES)
       }
       s <- s[order(s[,"mz"], decreasing = FALSE),]
       # $$ToDo$$

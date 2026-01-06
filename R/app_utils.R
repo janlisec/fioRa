@@ -25,16 +25,27 @@ verify_suggested <- function(pkg) {
 #' @param smiles Valid SMILES code used to calculate the formula.
 #' @author Emma Schymanski <emma.schymanski@@uni.lu>
 #' @examples
-#' smiles2formula(smiles = "OC(=O)C")
+#' smiles <- c("CCO", "OC(=O)C", "OS(=O)(=O)c1ccc(cc1)C(CC(=O)O)CC(=O)O")
+#' smiles2formula(smiles = smiles)
 #' @return Returns the molecular formula only (the \code{rcdk} function contains additional text).
 #' @noRd
 #' @keywords internal
 smiles2formula <- function(smiles) {
-  mol <- rcdk::parse.smiles(smiles)[[1]]
-  rcdk::convert.implicit.to.explicit(mol)
-  formula <- rcdk::get.mol2formula(mol, charge=0)
-  return(formula@string)
+  mol <- rcdk::parse.smiles(smiles)
+  # not sure if function rcdk::convert.implicit.to.explicit really is required at some point
+  #mapply(rcdk::convert.implicit.to.explicit, mol)
+  return(sapply(1:length(mol), function(i) { rcdk::get.mol2formula(mol[[i]], charge=0)@string }))
 }
+# smiles2formula_old <- function(smiles) {
+#   mol <- rcdk::parse.smiles(smiles)[[1]]
+#   #rcdk::convert.implicit.to.explicit(mol)
+#   formula <- rcdk::get.mol2formula(mol, charge=0)
+#   return(formula@string)
+# }
+# microbenchmark::microbenchmark(
+#   "new" = smiles2formula(smiles = smiles),
+#   "old" = sapply(smiles, smiles2formula_old)
+# )
 
 #' @title Render SMILES into 2D image for plotting via rcdk.
 #' @description This function uses the rcdk to parse the smiles into a mol, with
