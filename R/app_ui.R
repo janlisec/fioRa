@@ -55,7 +55,15 @@ app_ui <- function(request) {
         id = "panel_help",
         title = "Help",
         icon = shiny::icon("angle-right"),
-        shiny::div(style = nps, shiny::HTML('Please go to the <a href="https://github.com/janlisec/fioRa" target="_blank" rel="noopener noreferrer">fioRa GitHub page</a> to read the documentation.'))
+        shiny::div(
+          style = nps,
+          shiny::HTML(
+            '<p>Please go to the <a href="https://github.com/janlisec/fioRa" target="_blank" rel="noopener noreferrer">fioRa GitHub page</a> to read the documentation on fioRa.</p>',
+            '<p>Use the "input" section from the foldable menu on the left to specify compounds you would like fioRa to predict an MS2 spectrum for. Your options to provide SMILES codes are by uploading a csv file, entering the SMILES in a simple form or pasting directly to a textbox.</p>',
+            '<p>Processing is always started using the respective button below the textbox. Processing is limited to 10 compounds. To process larger numbers, please install fioRa locally and use function "run_script".</p>',
+            '<p>After the processing is finished the "output" section is propagated with the results. You may inspect the predicted spectra for each compound or download the result file in msp-format.</p>'
+          )
+        )
       )
     )
   )

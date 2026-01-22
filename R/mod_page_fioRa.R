@@ -59,9 +59,35 @@ page_fioRa_ui <- function(id) {
           shiny::div(style = "height: 72px; font-size: 1.25rem; padding-top: 48px;", "fioRa output"),
           shinyjs::hidden(shiny::div(
             id = ns("usr_opt"),
-            shiny::div(style = "float: left; margin-left: 15px; width: 180px;", shiny::checkboxInput(inputId = ns("show_neutral_losses"), label = "show_neutral_losses", value = TRUE)),
-            shiny::div(style = "float: left; margin-left: 5px; height: 38px;", selectInputWithButtonsUI(id = ns("current_name"))),
-            shiny::div(style = "float: left; margin-left: 35px; margin-right: 24px; width: 60px; height: 38px;", shiny::downloadButton(outputId = ns("btn_download_msp"), label = "", width = 40))
+            shiny::div(
+              style = "float: left; margin-left: 15px; width: 260px;",
+              shiny::helpText(
+                "To zoom in: select a region with click and drag and double click to confirm.",
+                "To zoom out: double click within plot but with no region selected."
+              )
+            ),
+            shiny::div(
+              style = "float: left; margin-left: 15px; width: 260px;",
+              shiny::sliderInput(
+                inputId = ns("masslab"), label = "Annotate above relative intensity of", min = 0, max = 0.25, value = 0.02, step = 0.01
+              )
+            ),
+            shiny::div(
+              style = "float: left; margin-left: 15px; width: 180px;",
+              shiny::checkboxGroupInput(
+                inputId = ns("plot_opt"), label = "overlay",
+                choices = list("neutral losses"="losses", "chemical structure"="smiles"),
+                selected = c("losses", "smiles")
+              )
+            ),
+            shiny::div(
+              style = "float: left; margin-left: 5px; height: 38px;",
+              selectInputWithButtonsUI(id = ns("current_name"))
+            ),
+            shiny::div(
+              style = "float: left; margin-left: 35px; margin-right: 24px; width: 60px; height: 38px;",
+              shiny::downloadButton(outputId = ns("btn_download_msp"), label = "", width = 40)
+            )
           ))
         ),
         bslib::layout_sidebar(
@@ -74,6 +100,7 @@ page_fioRa_ui <- function(id) {
           style = "resize:vertical;",
           shiny::plotOutput(
             outputId = ns("spec"),
+            height = "800px",
             dblclick = ns("spec_dblclick"),
             brush = brushOpts(id = ns("spec_brush"), resetOnNew = TRUE)
           )
@@ -165,8 +192,9 @@ page_fioRa_server <- function(id, fiora_script = "/home/shiny_test/miniforge3/en
     output$spec <- shiny::renderPlot({
       shiny::validate(shiny::need(rv$res, "Spectrum plot will be shown after calculation is finished"))
       req(rv$name())
-      plot_spec(s = rv$res[[rv$name()]][["spec"]], show_neutral_losses = input$show_neutral_losses, xlim = ranges$x, ylim = ranges$y)
-    }, res = 72*1.25)
+      #par("cex"=1.25)
+      plot_spec(s = rv$res[[rv$name()]][["spec"]], show_neutral_losses = "losses" %in% input$plot_opt, show_smiles = "smiles" %in% input$plot_opt, masslab = as.numeric(input$masslab), xlim = ranges$x, ylim = ranges$y)
+    }, res = 72*1.5)
 
     # When a double-click happens, check if there's a brush on the plot.
     # If so, zoom to the brush bounds; if not, reset the zoom.

@@ -127,14 +127,14 @@ renderSMILES <- function(smiles, kekulise=TRUE, coords=c(0,0,100,100)) {
 #' @noRd
 #' @keywords internal
 square_subplot_coord <- function(x, y, w = 0.2) {
-  # Ermitteln der Abmessungen des plotting device
+  # get plotting device size in inch
   device_width <- grDevices::dev.size("in")[1]
   device_height <- grDevices::dev.size("in")[2]
 
-  # Berechnung der Größe des Subplots (w % der kleineren Seite)
+  # calc subplot size (w of smaller side)
   subplot_size <- w * min(device_width, device_height)
 
-  # Ermittlung der user coordinates
+  # calc user coordinates
   usr <- graphics::par("usr")
   x_range <- usr[2] - usr[1]
   y_range <- usr[4] - usr[3]
@@ -200,16 +200,37 @@ cce <- InterpretMSSpectrum::CountChemicalElements
 #' @examples
 #' fl <- system.file("extdata/annotated_output.mgf", package = "fioRa")
 #' tmp <- fioRa::read_fiora(fl = fl)
-#' s <- tmp[[1]][["spec"]]
+#' s <- tmp[[3]][["spec"]]
 #' plot_spec(s = s)
+#' plot_spec(s = s, masslab = 0.2)
+#' plot_spec(s = s, show_neutral_losses = FALSE)
 #' @return Returns a plot.
 #' @noRd
 #' @keywords internal
-plot_spec <- function(s, show_neutral_losses = TRUE, ...) {
+plot_spec <- function(s, show_neutral_losses = TRUE, show_smiles = TRUE, masslab = 0.01, ...) {
   verify_suggested(pkg = c("rcdk", "InterpretMSSpectrum"))
   #flt <- which(s[,"int"] > 0.05*max(s[,"int"], na.rm=T))
+  # keep only the SMILES with the highest intensity from a group of SMILES with identical adduct/formula combinations
+  s <- ldply_base(split(s, s[,"formula"]), function(x) {
+    ldply_base(split(x, x[,"adduct"]), function(y) {
+      y[,"n_isomers"] <- 1
+      if (nrow(y)>=2) {
+        y[,"n_isomers"] <- nrow(y)
+        int_sum <- sum(y[,"int"])
+        y <- y[which.max(y[,"int"]),]
+        y[,"int"] <- int_sum
+        return(y)
+      } else {
+        (y)
+      }
+    })
+  })
+  s <- s[order(s[,"mz"]),]
   rownames(s) <- 1:nrow(s)
+  # get the peaks with annotatable sum formulas
   flt <- sort(as.numeric(sapply(split(s, s[,"formula"]), function(x) { rownames(x)[which.max(x[,"int"])] })))
+  # limit to those above a relative int threshold
+  flt <- flt[s[flt,"int"]>=masslab*max(s[flt,"int"])]
   # correct formula by adduct information for number of H
   for (i in flt) s[i,"formula"] <- add_adduct(s[i,"formula"], s[i,"adduct"])
   txt <- data.frame("x"=s[flt,"mz"], "txt"=s[flt,"formula"], "expr"=TRUE)
@@ -217,22 +238,44 @@ plot_spec <- function(s, show_neutral_losses = TRUE, ...) {
     x <- cce(x = x)
     paste(names(x), sapply(x, function(n) { if(n==1) "" else paste0("[",n,"]")}), sep="", collapse="~")
   })
-  neutral_losses <- NULL
+  neutral_losses <- data.frame("Name"="", "Formula"="", "Mass"=0L)
   if (show_neutral_losses && length(flt)>=2) {
-    ele_precursor <- cce(s[flt[length(flt)],"formula"])
-    nl <- unname(sapply(s[flt[-length(flt)],"formula"], function(x) {
-      x <- ele_precursor-cce(x, ele = names(ele_precursor))
-      x <- x[x>0]
-      paste(names(x), sapply(x, function(n) { if (n==1) "" else n }), sep="", collapse="")
-      #paste(names(x), sapply(x, function(n) { if(n==1) "" else paste0("[",n,"]")}), sep="", collapse="~")
-      #paste(names(x), x, sep="", collapse="")
-    }))
-    neutral_losses <- data.frame("Name"=nl, "Formula"=nl, "Mass"=s[flt[length(flt)],"mz"]-s[flt[-length(flt)],"mz"])
+    if (FALSE) {
+      # this is the (old) version to show neutral losses just with respect to the precursor
+      ele_precursor <- cce(s[flt[length(flt)],"formula"])
+      nl <- unname(sapply(s[flt[-length(flt)],"formula"], function(x) {
+        x <- ele_precursor-cce(x, ele = names(ele_precursor))
+        x <- x[x>0]
+        paste(names(x), sapply(x, function(n) { if (n==1) "" else n }), sep="", collapse="")
+      }))
+      neutral_losses <- data.frame("Name"=nl, "Formula"=nl, "Mass"=s[flt[length(flt)],"mz"]-s[flt[-length(flt)],"mz"])
+    }
+    # this is the (new) version to show neutral losses between all peaks
+    eles <- stats::setNames(lapply(s[flt,"formula"], cce, ele = names(cce(s[flt[length(flt)],"formula"]))), flt)
+    neutral_losses <- ldply_base(flt[-length(flt)], function(x) {
+      ldply_base(flt[flt>x], function(y) {
+        sm <- eles[[as.character(x)]]
+        mm <- eles[[as.character(y)]]
+        if (all(mm >= sm)) {
+          nl <- mm-sm
+          nl <- nl[nl>0]
+          nl <- paste(names(nl), sapply(unname(nl),function(z){ifelse(z>1,z,"")}), sep="", collapse="")
+          data.frame("Name"=nl, "Formula"=nl, "Mass"=s[y,"mz"]-s[x,"mz"])
+        } else {
+          NULL
+        }
+      })
+    })
+    #print(neutral_losses)
   }
-  InterpretMSSpectrum::PlotSpec(x=s[,1:2], masslab = 0.01, cutoff = 0, txt = txt, ionization="ESI", neutral_losses = neutral_losses, precursor = s[nrow(s),1], ...)
-  for (i in flt) {
-    renderSMILES(smiles = s[i,"SMILES"], coords = square_subplot_coord(x = s[i,"mz"], y = s[i,"int"], w = 0.2))
+  InterpretMSSpectrum::PlotSpec(x=s[,1:2], masslab = masslab, cutoff = 0, txt = txt, ionization="ESI", neutral_losses = neutral_losses, precursor = s[nrow(s),1], ...)
+  if (show_smiles) {
+    for (i in flt) {
+      #message(paste(graphics::par("usr"), collapse=", "))
+      renderSMILES(smiles = s[i,"SMILES"], coords = square_subplot_coord(x = s[i,"mz"], y = s[i,"int"], w = 0.2))
+    }
   }
+  invisible(s)
 }
 
 #' @title convert2Spectra.

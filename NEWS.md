@@ -1,3 +1,12 @@
+# v0.3.7 by jan.lisec@bam.de (2026-01-22)
+
+* several improvements regarding the shiny app
+* plot output for spectra improved a lot, i.e. isomeric peaks are combined now,
+  neutral losses are computed between fragments in addition to the precursor,
+  annotation can be omitted for minor peaks, all sum formulas are depicted using
+  subscript for numbers to improve readability, font size was increased
+* Help page received some input (very basic, for first time users)
+
 # v0.3.6 by jan.lisec@bam.de
 
 * `read_fiora()` now exported function
