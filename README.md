@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# `{fioRa}` 0.3.6
+# `{fioRa}` 0.3.7
 
 <!-- badges: start -->
 
@@ -70,10 +70,10 @@ alt="fioRa screenshot" />
 <figcaption aria-hidden="true">fioRa screenshot</figcaption>
 </figure>
 
-Alternatively you can use the exported function `run_script()` to work
+Alternatively, you can use the exported function `run_script()` to work
 in the R command line directly. This will accept R styled input
 parameters, generate an appropriate temporary **FIORA** input file,
-process it and return an R styled list including the predicted MS/MS
+process it, and return an R styled list including the predicted MS/MS
 spectrum.
 
 ``` r
@@ -121,5 +121,5 @@ fioRa::run_script(x = x, annotation = TRUE)
 
 ## About
 
-You are reading the doc about version 0.3.6 compiled on 2025-12-15
-13:34:30.883037.
+You are reading the doc about version 0.3.7 compiled on 2026-01-23
+13:28:55.965608.

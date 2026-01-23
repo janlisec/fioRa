@@ -64,9 +64,9 @@ fioRa::run_app()
 
 ![fioRa screenshot](dev/fioRa_screenshot.png?raw=true "fioRa screenshot")
 
-Alternatively you can use the exported function `run_script()` to work in the 
+Alternatively, you can use the exported function `run_script()` to work in the 
 R command line directly. This will accept R styled input parameters, generate 
-an appropriate temporary **FIORA** input file, process it and return an R styled 
+an appropriate temporary **FIORA** input file, process it, and return an R styled 
 list including the predicted MS/MS spectrum.
 
 ```{r run_script, eval = TRUE}
