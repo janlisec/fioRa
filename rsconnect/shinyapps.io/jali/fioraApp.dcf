@@ -5,6 +5,6 @@ account: jali
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 14613453
-bundleId: 10192133
+bundleId: 10478574
 url: https://jali.shinyapps.io/fioraApp/
 version: 1

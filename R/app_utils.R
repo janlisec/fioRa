@@ -166,6 +166,8 @@ square_subplot_coord <- function(x, y, w = 0.2) {
 #' @return SumFormula.
 #' @examples
 #' add_adduct(fml = "CHO", ad = "[M+2H]+")
+#' add_adduct(fml = "HF", ad = "[M-H]-")
+#' add_adduct(fml = "HF", ad = "[M-2H]-")
 #' @keywords internal
 #' @noRd
 add_adduct <- function(fml, ad) {
@@ -175,8 +177,17 @@ add_adduct <- function(fml, ad) {
     stop()
   }
   fml_ad <- cce(fml)
+  # initialize H=0 if not present in formula
+  if (!("H" %in% names(fml_ad))) fml_ad["H"] <- 0
   if (possible_adds[ad]!=0) {
-    fml_ad["H"] <- fml_ad["H"]+possible_adds[ad]
+    if (fml_ad["H"]+possible_adds[ad] < 0) {
+      message("Adduct definition and formula do not match (insufficient number of H); fml = ", fml, "; adduct = ", ad)
+      return(NA)
+    } else {
+      fml_ad["H"] <- fml_ad["H"]+possible_adds[ad]
+      # omit H=0 definitions
+      if (fml_ad["H"]==0 & length(fml_ad)>=2) fml_ad <- fml_ad[names(fml_ad)!="H"]
+    }
   }
   fml_ad <- paste(names(fml_ad), fml_ad, sep="", collapse="")
   return(fml_ad)
@@ -190,6 +201,83 @@ add_adduct <- function(fml, ad) {
 #' @keywords internal
 #' @noRd
 cce <- InterpretMSSpectrum::CountChemicalElements
+
+#' @title scale_int.
+#' @description Scale an intensity vector of a mass spectrum.
+#' @param x Numeric vector x.
+#' @param scale scale.
+#' @param d Rounding precision digits (if NULL, determined from scale).
+#' @return Scaled intensity.
+#' @keywords internal
+#' @noRd
+scale_int <- function(x, scale = 0, d = NULL) {
+  if (is.numeric(scale) && scale>0) {
+    x <- scale*x/max(x, na.rm=TRUE)
+    if (is.null(d)) d <- ifelse(scale>=100, 0, 4)
+    x <- round(x, digits = d)
+  }
+  return(x)
+}
+
+#' @title combine_isomers.
+#' @description Keep only the SMILES with the highest intensity from a group of
+#'     SMILES with identical adduct/formula combinations (isomers).
+#' @param s Spectrum with columns 'int', 'adduct' and 'formula'.
+#' @return Spectrum with combined isomers.
+#' @keywords internal
+#' @noRd
+combine_isomers <- function(s) {
+  ldply_base(split(s, s[,"formula"]), function(x) {
+    ldply_base(split(x, x[,"adduct"]), function(y) {
+      y[,"n_isomers"] <- 1
+      if (nrow(y)>=2) {
+        y[,"n_isomers"] <- nrow(y)
+        int_sum <- sum(y[,"int"])
+        y <- y[which.max(y[,"int"]),]
+        y[,"int"] <- int_sum
+      }
+      return(y)
+    })
+  })
+}
+
+#' @title get_neutral_loss_df.
+#' @description Keep only the SMILES with the highest intensity from a group of
+#'     SMILES with identical adduct/formula combinations (isomers).
+#' @param s Spectrum with columns 'int', 'adduct' and 'formula'.
+#' @return Spectrum with combined isomers.
+#' @keywords internal
+#' @noRd
+get_neutral_loss_df <- function(s) {
+  flt <- 1:nrow(s)
+  if (FALSE) {
+    # this is the (old) version to show neutral losses just with respect to the precursor
+    ele_precursor <- cce(s[flt[length(flt)],"formula"])
+    nl <- unname(sapply(s[flt[-length(flt)],"formula"], function(x) {
+      x <- ele_precursor-cce(x, ele = names(ele_precursor))
+      x <- x[x>0]
+      paste(names(x), sapply(x, function(n) { if (n==1) "" else n }), sep="", collapse="")
+    }))
+    neutral_losses <- data.frame("Name"=nl, "Formula"=nl, "Mass"=s[flt[length(flt)],"mz"]-s[flt[-length(flt)],"mz"])
+  }
+  # this is the (new) version to show neutral losses between all peaks
+  eles <- stats::setNames(lapply(s[flt,"formula"], cce, ele = names(cce(s[flt[length(flt)],"formula"]))), flt)
+  neutral_losses <- ldply_base(flt[-length(flt)], function(x) {
+    ldply_base(flt[flt>x], function(y) {
+      sm <- eles[[as.character(x)]]
+      mm <- eles[[as.character(y)]]
+      if (all(mm >= sm)) {
+        nl <- mm-sm
+        nl <- nl[nl>0]
+        nl <- paste(names(nl), sapply(unname(nl),function(z){ifelse(z>1,z,"")}), sep="", collapse="")
+        data.frame("Name"=nl, "Formula"=nl, "Mass"=s[y,"mz"]-s[x,"mz"])
+      } else {
+        NULL
+      }
+    })
+  })
+  return(neutral_losses)
+}
 
 #' @title Plot MS^2 spectrum.
 #' @description This function...
@@ -211,28 +299,16 @@ plot_spec <- function(s, show_neutral_losses = TRUE, show_smiles = TRUE, masslab
   verify_suggested(pkg = c("rcdk", "InterpretMSSpectrum"))
   #flt <- which(s[,"int"] > 0.05*max(s[,"int"], na.rm=T))
   # keep only the SMILES with the highest intensity from a group of SMILES with identical adduct/formula combinations
-  s <- ldply_base(split(s, s[,"formula"]), function(x) {
-    ldply_base(split(x, x[,"adduct"]), function(y) {
-      y[,"n_isomers"] <- 1
-      if (nrow(y)>=2) {
-        y[,"n_isomers"] <- nrow(y)
-        int_sum <- sum(y[,"int"])
-        y <- y[which.max(y[,"int"]),]
-        y[,"int"] <- int_sum
-        return(y)
-      } else {
-        (y)
-      }
-    })
-  })
+  s <- combine_isomers(s=s)
   s <- s[order(s[,"mz"]),]
   rownames(s) <- 1:nrow(s)
   # get the peaks with annotatable sum formulas
   flt <- sort(as.numeric(sapply(split(s, s[,"formula"]), function(x) { rownames(x)[which.max(x[,"int"])] })))
   # limit to those above a relative int threshold
   flt <- flt[s[flt,"int"]>=masslab*max(s[flt,"int"])]
-  # correct formula by adduct information for number of H
+  # correct formula by adduct information for number of H and filter invalid combinations
   for (i in flt) s[i,"formula"] <- add_adduct(s[i,"formula"], s[i,"adduct"])
+  flt <- flt[!is.na(s[flt,"formula"])]
   txt <- data.frame("x"=s[flt,"mz"], "txt"=s[flt,"formula"], "expr"=TRUE)
   txt$txt <- sapply(txt$txt, function(x) {
     x <- cce(x = x)
@@ -240,33 +316,7 @@ plot_spec <- function(s, show_neutral_losses = TRUE, show_smiles = TRUE, masslab
   })
   neutral_losses <- data.frame("Name"="", "Formula"="", "Mass"=0L)
   if (show_neutral_losses && length(flt)>=2) {
-    if (FALSE) {
-      # this is the (old) version to show neutral losses just with respect to the precursor
-      ele_precursor <- cce(s[flt[length(flt)],"formula"])
-      nl <- unname(sapply(s[flt[-length(flt)],"formula"], function(x) {
-        x <- ele_precursor-cce(x, ele = names(ele_precursor))
-        x <- x[x>0]
-        paste(names(x), sapply(x, function(n) { if (n==1) "" else n }), sep="", collapse="")
-      }))
-      neutral_losses <- data.frame("Name"=nl, "Formula"=nl, "Mass"=s[flt[length(flt)],"mz"]-s[flt[-length(flt)],"mz"])
-    }
-    # this is the (new) version to show neutral losses between all peaks
-    eles <- stats::setNames(lapply(s[flt,"formula"], cce, ele = names(cce(s[flt[length(flt)],"formula"]))), flt)
-    neutral_losses <- ldply_base(flt[-length(flt)], function(x) {
-      ldply_base(flt[flt>x], function(y) {
-        sm <- eles[[as.character(x)]]
-        mm <- eles[[as.character(y)]]
-        if (all(mm >= sm)) {
-          nl <- mm-sm
-          nl <- nl[nl>0]
-          nl <- paste(names(nl), sapply(unname(nl),function(z){ifelse(z>1,z,"")}), sep="", collapse="")
-          data.frame("Name"=nl, "Formula"=nl, "Mass"=s[y,"mz"]-s[x,"mz"])
-        } else {
-          NULL
-        }
-      })
-    })
-    #print(neutral_losses)
+    neutral_losses <- get_neutral_loss_df(s = s[flt,])
   }
   InterpretMSSpectrum::PlotSpec(x=s[,1:2], masslab = masslab, cutoff = 0, txt = txt, ionization="ESI", neutral_losses = neutral_losses, precursor = s[nrow(s),1], ...)
   if (show_smiles) {

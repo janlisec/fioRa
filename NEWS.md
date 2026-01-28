@@ -1,3 +1,10 @@
+# v0.3.8 by jan.lisec@bam.de (2026-01-28)
+
+* spectra intensities can be scaled to a user selected maximum value
+* invalid formula/adduct combinations are removed upon import
+* stereo isomer intensities are combined and only the highest isomer formula is kept/depicted
+* spectra table shows formula and adduct additionally
+
 # v0.3.7 by jan.lisec@bam.de (2026-01-22)
 
 * several improvements regarding the shiny app

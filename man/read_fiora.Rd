@@ -4,7 +4,7 @@
 \alias{read_fiora}
 \title{Read a fiora result file (mgf) into a R object.}
 \usage{
-read_fiora(fl, fmt = c("list", "df", "Spectra"))
+read_fiora(fl, fmt = c("list", "df", "Spectra"), check = TRUE, scale = 0)
 }
 \arguments{
 \item{fl}{file.}
@@ -12,6 +12,14 @@ read_fiora(fl, fmt = c("list", "df", "Spectra"))
 \item{fmt}{A named list object is returned if not specified otherwise. Set 'fmt=df'
 to simplify the return value to a data frame. Use 'fmt=Spectra' to convert to
 a [Spectra::Spectra()] object.}
+
+\item{check}{Perform some sanity checks on a `FIORA` result file, i.e. avoiding
+invalid adducts defining [M-3H] where only one or two H atoms are contained
+in the formula.}
+
+\item{scale}{Allows to scale spectra upon import. For scale=0 (default) no modification
+is applied. Otherwise the maximum intensity peak is set to the specified value.
+Values of 999 (for NIST), 1 or 100 would be common choices.}
 }
 \value{
 A result list of length = n_compounds containing metadata fields as
@@ -21,7 +29,7 @@ A result list of length = n_compounds containing metadata fields as
     and information regarding SMILES, adduct or formula per peak will be lost).
 }
 \description{
-Allows to import a `fioRa` output file (msp like format) to a list
+Allows to import a `FIORA` output file (msp like format) to a list
     like format or simplified to a data frame or Spectra object.
 }
 \examples{

@@ -48,6 +48,10 @@ page_fioRa_ui <- function(id) {
             "[Textbox] Copy/paste fioRa input",
             #shiny::textAreaInput(inputId = ns("text_input"), label = "Enter infos for up to 10 compounds (one per row) in depicted format:", value = "Name,SMILES,Precursor_type,CE,Instrument_type\n", rows = 12)
             shiny::textAreaInput(inputId = ns("text_input"), label = NULL, value = "Name,SMILES,Precursor_type,CE,Instrument_type\n", rows = 12),
+            bslib::layout_columns(
+              col_widths = c(8, 4),
+              shiny::radioButtons(inputId = ns("par_scale"), label = "Scale intensities to max of", choices = list("as is"=0, "1"=1, "100"=100, "999"=999), inline=TRUE),
+            ),
             shiny::actionButton(inputId = ns("start_button"), "Process [Textbox] input")
           )
         ))
@@ -173,7 +177,7 @@ page_fioRa_server <- function(id, fiora_script = "/home/shiny_test/miniforge3/en
       if (!file.exists(temp_output_file)) {
         message("Could not create output file. Check logs.")
       } else {
-        res <- read_fiora(fl = temp_output_file)
+        res <- read_fiora(fl = temp_output_file, fmt = "list", check = TRUE, scale = as.numeric(input$par_scale))
         rv$choices <- names(res)
         name_choices(names(res))
         shinyjs::show(id = "usr_opt")
@@ -213,7 +217,9 @@ page_fioRa_server <- function(id, fiora_script = "/home/shiny_test/miniforge3/en
     output$tab <- shiny::renderTable({
       shiny::validate(shiny::need(rv$res, "Spectrum table will be shown after calculation is finished"))
       req(rv$name())
-      rv$res[[rv$name()]][["spec"]][,c("mz","int")]
+      #browser()
+      rv$res[[rv$name()]][["spec"]][,c("mz","int","formula","adduct")]
+      #rv$res[[rv$name()]][["spec"]][,c("mz","int")]
     }, striped = TRUE, hover = TRUE, digits = 4)
 
     shiny::observeEvent(input$file_input, {

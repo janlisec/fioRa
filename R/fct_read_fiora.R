@@ -4,8 +4,14 @@
 #' @param fmt A named list object is returned if not specified otherwise. Set 'fmt=df'
 #'     to simplify the return value to a data frame. Use 'fmt=Spectra' to convert to
 #'     a [Spectra::Spectra()] object.
+#' @param check Perform some sanity checks on a `FIORA` result file, i.e. avoiding
+#'     invalid adducts defining [M-3H] where only one or two H atoms are contained
+#'     in the formula.
+#' @param scale Allows to scale spectra upon import. For scale=0 (default) no modification
+#'     is applied. Otherwise the maximum intensity peak is set to the specified value.
+#'     Values of 999 (for NIST), 1 or 100 would be common choices.
 #'
-#' @description Allows to import a `fioRa` output file (msp like format) to a list
+#' @description Allows to import a `FIORA` output file (msp like format) to a list
 #'     like format or simplified to a data frame or Spectra object.
 #'
 #' @return A result list of length = n_compounds containing metadata fields as
@@ -32,7 +38,7 @@
 #'
 #' @export
 #' @seealso [Spectra::Spectra()]
-read_fiora <- function(fl, fmt = c("list", "df", "Spectra")) {
+read_fiora <- function(fl, fmt = c("list", "df", "Spectra"), check = TRUE, scale = 0) {
   fmt <- match.arg(fmt)
   x <- readLines(fl)
   i <- which(x=="BEGIN IONS")
@@ -52,8 +58,7 @@ read_fiora <- function(fl, fmt = c("list", "df", "Spectra")) {
     if (fmt == "df") {
       # keep only spectra information
       mz <- round(as.numeric(s[,1]),4)
-      int <- round(as.numeric(s[,2]),4)
-      int <- round(999*int/max(int, na.rm=TRUE))
+      int <- scale_int(x = as.numeric(s[,2]), scale =scale)
       ord <- order(int, decreasing = TRUE)
       s <- paste(mz[ord], int[ord], sep=":", collapse=" ")
     } else {
@@ -64,13 +69,19 @@ read_fiora <- function(fl, fmt = c("list", "df", "Spectra")) {
         tmp <- strsplit(s[,3], "//")
         s$adduct <- sapply(tmp, function(z) { z[2] }, USE.NAMES = FALSE)
         s$SMILES <- sapply(tmp, function(z) { z[1] }, USE.NAMES = FALSE)
-        #s$formula <- sapply(s$SMILES, function(z) { smiles2formula(z) }, USE.NAMES = FALSE)
         s$formula <- smiles2formula(s$SMILES)
+        if (check) {
+          # remove invalid adducts
+          fml_with_add <- sapply(1:nrow(s), function(i) { add_adduct(s[i,"formula"], s[i,"adduct"]) })
+          s <- s[!is.na(fml_with_add),]
+          # $$ToDo$$
+          # - remove mz redundancy for multiple SMILES giving the same mz at different int values
+          #browser()
+          s <- combine_isomers(s=s)
+        }
       }
       s <- s[order(s[,"mz"], decreasing = FALSE),]
-      # $$ToDo$$
-      # - remove mz redundancy for multiple SMILES giving the same mz at different int values
-      # - possibly scale spectrum to max=100
+      s[,"int"] <- scale_int(x = s[,"int"], scale =scale)
       rownames(s) <- 1:nrow(s)
     }
     c(meta, list("spec" = s))
