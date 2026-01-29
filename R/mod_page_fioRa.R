@@ -29,13 +29,13 @@ page_fioRa_ui <- function(id) {
         position = "left", open = "open", width = 720,
         shiny::div(
         bslib::card_header(shiny::div(style = "font-size: 1.25rem; font-weight: 600; padding-top: 8px; padding-bottom: 2px;", "fioRa input")),
-        bslib::accordion(id = ns("acc"), multiple = FALSE, open = "[Textbox] Copy/paste fioRa input",
+        bslib::accordion(id = ns("acc"), multiple = FALSE, open = "[Textbox] copy/paste fioRa input",
           bslib::accordion_panel(
-            "[File] Load fioRa input from csv-file",
+            "[File-Input] Load fioRa input from csv-file",
             shiny::fileInput(inputId = ns("file_input"), label = NULL),
           ),
           bslib::accordion_panel(
-            "[Form] Create fioRa input using form (single compound)",
+            "[Form-Input] Create fioRa input using form (single compound)",
             shiny::textInput(inputId = ns("frm_smiles"), label = "SMILES", value = "CC1=CC(=O)OC2=CC(OS(O)(=O)=O)=CC=C12"),
             bslib::layout_columns(
               shiny::selectInput(inputId = ns("frm_ptype"), label = "Precursor_type", choices = c("[M+H]+","[M-H]-"), selected = "[M-H]-"),
@@ -45,14 +45,14 @@ page_fioRa_ui <- function(id) {
             shiny::actionButton(inputId = ns("frm_btn"), label = "Transfer to [Textbox]")
           ),
           bslib::accordion_panel(
-            "[Textbox] Copy/paste fioRa input",
+            "[Textbox] copy/paste fioRa input",
             #shiny::textAreaInput(inputId = ns("text_input"), label = "Enter infos for up to 10 compounds (one per row) in depicted format:", value = "Name,SMILES,Precursor_type,CE,Instrument_type\n", rows = 12)
-            shiny::textAreaInput(inputId = ns("text_input"), label = NULL, value = "Name,SMILES,Precursor_type,CE,Instrument_type\n", rows = 12),
+            shiny::textAreaInput(inputId = ns("text_input"), label = NULL, value = "Name,SMILES,Precursor_type,CE,Instrument_type\n", rows = 18),
             bslib::layout_columns(
-              col_widths = c(8, 4),
-              shiny::radioButtons(inputId = ns("par_scale"), label = "Scale intensities to max of", choices = list("as is"=0, "1"=1, "100"=100, "999"=999), inline=TRUE),
-            ),
-            shiny::actionButton(inputId = ns("start_button"), "Process [Textbox] input")
+              col_widths = c(6, 6),
+              shiny::actionButton(inputId = ns("start_button"), "Process [Textbox] input"),
+              shiny::radioButtons(inputId = ns("par_scale"), label = "Scale ion intensities to max of", choices = list("as is"=0, "1"=1, "100"=100, "999"=999), inline=TRUE),
+            )
           )
         ))
       ),
@@ -98,7 +98,7 @@ page_fioRa_ui <- function(id) {
           padding = 0,
           sidebar = bslib::sidebar(
             id = ns("sidebar_spec"),
-            position = "right", open = FALSE, width = 320,
+            position = "right", open = FALSE, width = 480,
             shiny::tableOutput(outputId = ns("tab"))
           ),
           style = "resize:vertical;",
@@ -196,7 +196,6 @@ page_fioRa_server <- function(id, fiora_script = "/home/shiny_test/miniforge3/en
     output$spec <- shiny::renderPlot({
       shiny::validate(shiny::need(rv$res, "Spectrum plot will be shown after calculation is finished"))
       req(rv$name())
-      #par("cex"=1.25)
       plot_spec(s = rv$res[[rv$name()]][["spec"]], show_neutral_losses = "losses" %in% input$plot_opt, show_smiles = "smiles" %in% input$plot_opt, masslab = as.numeric(input$masslab), xlim = ranges$x, ylim = ranges$y)
     }, res = 72*1.5)
 
@@ -217,7 +216,6 @@ page_fioRa_server <- function(id, fiora_script = "/home/shiny_test/miniforge3/en
     output$tab <- shiny::renderTable({
       shiny::validate(shiny::need(rv$res, "Spectrum table will be shown after calculation is finished"))
       req(rv$name())
-      #browser()
       rv$res[[rv$name()]][["spec"]][,c("mz","int","formula","adduct")]
       #rv$res[[rv$name()]][["spec"]][,c("mz","int")]
     }, striped = TRUE, hover = TRUE, digits = 4)
@@ -225,7 +223,7 @@ page_fioRa_server <- function(id, fiora_script = "/home/shiny_test/miniforge3/en
     shiny::observeEvent(input$file_input, {
       tmp_data <- readLines(input$file_input$datapath)
       shiny::updateTextAreaInput(inputId = "text_input", value = paste(tmp_data, collapse="\n"))
-      bslib::accordion_panel_open(id = "acc", values = "[Textbox] Copy/paste fioRa input")
+      bslib::accordion_panel_open(id = "acc", values = "[Textbox] copy/paste fioRa input")
     })
 
     shiny::observeEvent(input$frm_btn, {
@@ -235,8 +233,7 @@ page_fioRa_server <- function(id, fiora_script = "/home/shiny_test/miniforge3/en
         ""
       )
       shiny::updateTextAreaInput(inputId = "text_input", value = paste(tmp_data, collapse="\n"))
-      bslib::accordion_panel_open(id = "acc", values = "[Textbox] Copy/paste fioRa input")
-      #start_button_events()
+      bslib::accordion_panel_open(id = "acc", values = "[Textbox] copy/paste fioRa input")
     })
 
   })

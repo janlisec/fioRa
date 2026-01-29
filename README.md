@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# `{fioRa}` 0.3.7
+# `{fioRa}` 0.3.9
 
 <!-- badges: start -->
 
@@ -16,10 +16,10 @@ coverage](https://codecov.io/gh/janlisec/fioRa/graph/badge.svg)](https://app.cod
 Badge](https://img.shields.io/badge/doi-10.1038/s41467--025--57422--4-yellow.svg)](https://doi.org/10.1038/s41467-025-57422-4)
 <!-- badges: end -->
 
-**FIORA** is an in silico fragmentation algorithm designed to predict
+**FIORA** is an *in silico* fragmentation algorithm designed to predict
 tandem mass spectra (MS/MS) with high accuracy. Using a graph neural
-network, FIORA models bond cleavages, fragment intensities, and
-estimates retention times (RT) and collision cross sections (CCS).
+network, **FIORA** models bond cleavages, fragment intensities, and
+estimates retention times (RT) and collision cross section (CCS) values.
 
 The original model and prediction algorithm is implemented in Python and
 can be found at its [GitHub Repo](https://github.com/BAMeScience/fiora).
@@ -27,8 +27,14 @@ The full description of the algorithm is published in a [Nature
 Communications article](https://doi.org/10.1038/s41467-025-57422-4).
 
 The R package `{fioRa}` provides a wrapper for **FIORA**, to either run
-the Python script using the R function `run_script()` or start a GUI
-(Shiny-App) using the R function `run_app()`.
+the Python script using the R function `run_script()` in the console or
+starting a Shiny-App using the R function `run_app()`.
+
+Processing in the App is easy (simply paste a SMILES code to an input
+form and click a button). Also, result inspection is fun using annotated
+spectra plots. However, to limit computational time the app is limited
+to processing 10 compounds at once. For larger numbers please use
+`run_script()`.
 
 ## Installation
 
@@ -41,7 +47,7 @@ devtools::install_github("janlisec/fioRa")
 
 Before first use you need to set up a python installation and a conda
 environment *fiora* which can be achieved from within R with the help of
-the `reticulate` package and a convenience function.
+the `reticulate` package and the convenience function `install_fiora()`.
 
 ``` r
 fioRa::install_fiora()
@@ -55,6 +61,10 @@ fioRa::install_fiora()
 #> $script
 #> [1] "C:\\Users\\jlisec\\AppData\\Local\\r-miniconda\\envs\\fiora\\Scripts\\fiora-predict"
 ```
+
+If a valid installation is found `install_fioRa()` will return a short
+list providing the current OS, path of the python executable and
+fiora-predict script.
 
 ## Run
 
@@ -71,10 +81,9 @@ alt="fioRa screenshot" />
 </figure>
 
 Alternatively, you can use the exported function `run_script()` to work
-in the R command line directly. This will accept R styled input
-parameters, generate an appropriate temporary **FIORA** input file,
-process it, and return an R styled list including the predicted MS/MS
-spectrum.
+in the R console directly. This will accept R styled input parameters,
+generate an appropriate temporary **FIORA** input file, process it, and
+return an R styled list including the predicted MS/MS spectrum.
 
 ``` r
 x <- data.frame(
@@ -86,6 +95,7 @@ x <- data.frame(
 )
 fioRa::run_script(x = x, annotation = TRUE)
 #> No valid 'default_path' provided, using reticulate::miniconda_path 'C:/Users/jlisec/AppData/Local/r-miniconda'.
+#> Adduct definition and formula do not match (insufficient number of H); fml = H2O3S; adduct = [M-3H]-
 #> $Example_0
 #> $Example_0$TITLE
 #> [1] "Example_0"
@@ -113,13 +123,16 @@ fioRa::run_script(x = x, annotation = TRUE)
 #> 
 #> $Example_0$spec
 #>          mz         int                           SMILES  adduct  formula
-#> 1  78.94844 0.013833499                      O=[SH](=O)O [M-3H]-    H2O3S
-#> 2  79.95681 0.002825602                      O=[SH](=O)O [M-2H]-    H2O3S
-#> 3 175.03897 0.899893463           Cc1cc(=O)oc2cc(O)ccc12  [M-H]-  C10H8O3
-#> 4 254.99688 0.102497801 Cc1cc(=O)oc2cc(OS(=O)(=O)O)ccc12  [M-H]- C10H8O6S
+#> 1  79.95681 0.002825602                      O=[SH](=O)O [M-2H]-    H2O3S
+#> 2 175.03897 0.899893463           Cc1cc(=O)oc2cc(O)ccc12  [M-H]-  C10H8O3
+#> 3 254.99688 0.102497801 Cc1cc(=O)oc2cc(OS(=O)(=O)O)ccc12  [M-H]- C10H8O6S
+#>   n_isomers
+#> 1         1
+#> 2         1
+#> 3         1
 ```
 
 ## About
 
-You are reading the doc about version 0.3.7 compiled on 2026-01-23
-13:28:55.965608.
+You are reading the doc about version 0.3.9 compiled on 2026-01-29
+17:07:26.570788.

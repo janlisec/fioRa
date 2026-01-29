@@ -1,9 +1,9 @@
 default:
-  golem_name: fioRa
-  golem_version: 0.0.0.9000
+  app_name: fioRa
   app_version: !expr as.character(utils::packageVersion("fioRa"))
   app_date: !expr as.character(utils::packageDate("fioRa"))
   app_prod: no
+  bam_server: yes
 production:
   app_prod: yes
 dev:

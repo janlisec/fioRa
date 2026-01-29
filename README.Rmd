@@ -23,10 +23,10 @@ output: github_document
 [![Static Badge](https://img.shields.io/badge/doi-10.1038/s41467--025--57422--4-yellow.svg)](https://doi.org/10.1038/s41467-025-57422-4)
 <!-- badges: end -->
 
-**FIORA** is an in silico fragmentation algorithm designed to predict tandem 
-mass spectra (MS/MS) with high accuracy. Using a graph neural network, FIORA 
+**FIORA** is an *in silico* fragmentation algorithm designed to predict tandem 
+mass spectra (MS/MS) with high accuracy. Using a graph neural network, **FIORA** 
 models bond cleavages, fragment intensities, and estimates retention times (RT) 
-and collision cross sections (CCS).
+and collision cross section (CCS) values.
 
 The original model and prediction algorithm is implemented in Python and can be
 found at its [GitHub Repo](https://github.com/BAMeScience/fiora). The full 
@@ -34,9 +34,14 @@ description of the algorithm is published in a
 [Nature Communications article](https://doi.org/10.1038/s41467-025-57422-4).
 
 The R package `{fioRa}` provides a wrapper for **FIORA**, to either run the 
-Python script using the R function `run_script()` or start a GUI (Shiny-App) 
-using the R function `run_app()`.
- 
+Python script using the R function `run_script()` in the console or starting a 
+Shiny-App using the R function `run_app()`.
+
+Processing in the App is easy (simply paste a SMILES code to an input form and 
+click a button). Also, result inspection is fun using annotated spectra plots. 
+However, to limit computational time the app is limited to processing 10 compounds 
+at once. For larger numbers please use `run_script()`.
+
 ## Installation
 
 You can install the development version of `{fioRa}` from GitHub.
@@ -48,11 +53,14 @@ devtools::install_github("janlisec/fioRa")
 
 Before first use you need to set up a python installation and a conda 
 environment *fiora* which can be achieved from within R with the help of 
-the `reticulate` package and a convenience function.
+the `reticulate` package and the convenience function `install_fiora()`.
 
 ```{r py_setup, eval = TRUE}
 fioRa::install_fiora()
 ```
+
+If a valid installation is found `install_fioRa()` will return a short list
+providing the current OS, path of the python executable and fiora-predict script.
 
 ## Run
 
@@ -65,8 +73,8 @@ fioRa::run_app()
 ![fioRa screenshot](dev/fioRa_screenshot.png?raw=true "fioRa screenshot")
 
 Alternatively, you can use the exported function `run_script()` to work in the 
-R command line directly. This will accept R styled input parameters, generate 
-an appropriate temporary **FIORA** input file, process it, and return an R styled 
+R console directly. This will accept R styled input parameters, generate an 
+appropriate temporary **FIORA** input file, process it, and return an R styled 
 list including the predicted MS/MS spectrum.
 
 ```{r run_script, eval = TRUE}

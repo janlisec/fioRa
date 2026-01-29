@@ -31,7 +31,7 @@ install_fiora <- function(conda_name = "fiora") {
   # [3] install python module fiora in a conda environment and activate
   if (conda_name %in% reticulate::conda_list()$name) {
     if (interactive()) {
-      q <- utils::askYesNo(msg = paste("There is a conda environment of name", conda_name, "present. Shall this environment be replaced with the new installation of 'fiora'?"))
+      q <- utils::askYesNo(msg = paste("There is a conda environment of name '", conda_name, "' present. Shall this environment be replaced with the new installation of 'fiora'?"))
       if (q) {
         message("removing old environment ", conda_name)
         reticulate::conda_remove(conda_name)
@@ -39,7 +39,11 @@ install_fiora <- function(conda_name = "fiora") {
         message("installing fiora to ", conda_name)
         reticulate::conda_install(conda_name, packages = "git+https://github.com/BAMeScience/fiora.git", pip = TRUE)
         reticulate::use_condaenv(conda_name, required = TRUE)
+      } else {
+        message(conda_name, " was found in reticulate::conda_list()$name (", paste(reticulate::conda_list()$name, collapse=", "), ") and not overwritten.")
       }
+    } else {
+      return(find_fiora_predict_paths(default_path = "C:\\Users\\jlisec\\AppData\\Local\\r-miniconda"))
     }
   } else {
     reticulate::conda_create(conda_name, channel = c("conda-forge"), forge = FALSE)

@@ -1,3 +1,7 @@
+# v0.3.9 by jan.lisec@bam.de (2026-01-28)
+
+* minor modifications to trigger update on server shn01
+
 # v0.3.8 by jan.lisec@bam.de (2026-01-28)
 
 * spectra intensities can be scaled to a user selected maximum value
