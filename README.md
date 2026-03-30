@@ -1,12 +1,14 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# `{fioRa}` 0.3.9
+# `fioRa`
 
 <!-- badges: start -->
 
 [![Static
 Badge](https://img.shields.io/badge/LiveApp-blue)](https://apps.bam.de/shn01/fioRa/)
+[![Static
+Badge](https://img.shields.io/github/r-package/v/janlisec/fioRa)](https://img.shields.io/github/r-package/v/janlisec/fioRa)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/fioRa)](https://CRAN.R-project.org/package=fioRa)
 [![R-CMD-check](https://github.com/janlisec/fioRa/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/janlisec/fioRa/actions/workflows/R-CMD-check.yaml)
@@ -51,7 +53,6 @@ the `reticulate` package and the convenience function `install_fiora()`.
 
 ``` r
 fioRa::install_fiora()
-#> No valid 'default_path' provided, using reticulate::miniconda_path 'C:/Users/jlisec/AppData/Local/r-miniconda'.
 #> $os
 #> [1] "Windows"
 #> 
@@ -132,7 +133,15 @@ fioRa::run_script(x = x, annotation = TRUE)
 #> 3         1
 ```
 
-## About
+You can use the exported functions `read_fiora()` and `plot_spec()` to
+import and plot **FIORA** results
 
-You are reading the doc about version 0.3.9 compiled on 2026-01-29
-17:07:26.570788.
+``` r
+fl <- system.file("extdata/annotated_output.mgf", package = "fioRa")
+tmp <- fioRa::read_fiora(fl = fl)
+#> Adduct definition and formula do not match (insufficient number of H); fml = H2O3S; adduct = [M-3H]-
+s <- tmp[[3]][["spec"]]
+fioRa::plot_spec(s = s, masslab = 0.05)
+```
+
+<img src="man/figures/README-plot_spec-1.png" alt="" width="100%" />

@@ -1,4 +1,11 @@
-# v0.3.9 by jan.lisec@bam.de (2026-01-28)
+# v0.3.10 by jan.lisec@bam.de (2026-03-30)
+
+* plot_spec() function is now exported (it allows to overlay chemical structures
+  on a spectrum plot)
+* minor fix correcting the position of SMILES subplots (had been shifted to the 
+  right plot border on Server)
+
+# v0.3.9 by jan.lisec@bam.de (2026-01-29)
 
 * minor modifications to trigger update on server shn01
 

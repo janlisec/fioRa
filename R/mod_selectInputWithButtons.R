@@ -47,7 +47,7 @@ selectInputWithButtonsUI <- function(id, label = NULL) {
           line-height: 12px;
         }
         .select-nav.with-label .arrow-column {
-          padding-top: 24px; /* Abstand f\u00fcr Labelh\u00f6he */
+          padding-top: 24px;
         }
       "))
     ),

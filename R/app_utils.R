@@ -281,55 +281,6 @@ get_neutral_loss_df <- function(s) {
   return(neutral_losses)
 }
 
-#' @title Plot MS^2 spectrum.
-#' @description This function...
-#' @param s A valid spectrum as predicted by fiora.
-#' @param show_neutral_losses show_neutral_losses.
-#' @param ... Passed on to InterpretMSSpectrum::PlotSpec().
-#' @details More information about aromaticity: \url{https://github.com/CDK-R/cdkr/issues/49}
-#' @examples
-#' fl <- system.file("extdata/annotated_output.mgf", package = "fioRa")
-#' tmp <- fioRa::read_fiora(fl = fl)
-#' s <- tmp[[3]][["spec"]]
-#' plot_spec(s = s)
-#' plot_spec(s = s, masslab = 0.2)
-#' plot_spec(s = s, show_neutral_losses = FALSE)
-#' @return Returns a plot.
-#' @noRd
-#' @keywords internal
-plot_spec <- function(s, show_neutral_losses = TRUE, show_smiles = TRUE, masslab = 0.01, ...) {
-  verify_suggested(pkg = c("rcdk", "InterpretMSSpectrum"))
-  #flt <- which(s[,"int"] > 0.05*max(s[,"int"], na.rm=T))
-  # keep only the SMILES with the highest intensity from a group of SMILES with identical adduct/formula combinations
-  s <- combine_isomers(s=s)
-  s <- s[order(s[,"mz"]),]
-  rownames(s) <- 1:nrow(s)
-  # get the peaks with annotatable sum formulas
-  flt <- sort(as.numeric(sapply(split(s, s[,"formula"]), function(x) { rownames(x)[which.max(x[,"int"])] })))
-  # limit to those above a relative int threshold
-  flt <- flt[s[flt,"int"]>=masslab*max(s[flt,"int"])]
-  # correct formula by adduct information for number of H and filter invalid combinations
-  for (i in flt) s[i,"formula"] <- add_adduct(s[i,"formula"], s[i,"adduct"])
-  flt <- flt[!is.na(s[flt,"formula"])]
-  txt <- data.frame("x"=s[flt,"mz"], "txt"=s[flt,"formula"], "expr"=TRUE)
-  txt$txt <- sapply(txt$txt, function(x) {
-    x <- cce(x = x)
-    paste(names(x), sapply(x, function(n) { if(n==1) "" else paste0("[",n,"]")}), sep="", collapse="~")
-  })
-  neutral_losses <- data.frame("Name"="", "Formula"="", "Mass"=0L)
-  if (show_neutral_losses && length(flt)>=2) {
-    neutral_losses <- get_neutral_loss_df(s = s[flt,])
-  }
-  InterpretMSSpectrum::PlotSpec(x=s[,1:2], masslab = masslab, cutoff = 0, txt = txt, ionization="ESI", neutral_losses = neutral_losses, precursor = s[nrow(s),1], ...)
-  if (show_smiles) {
-    for (i in flt) {
-      #message(paste(graphics::par("usr"), collapse=", "))
-      renderSMILES(smiles = s[i,"SMILES"], coords = square_subplot_coord(x = s[i,"mz"], y = s[i,"int"], w = 0.2))
-    }
-  }
-  invisible(s)
-}
-
 #' @title convert2Spectra.
 #' @description Convert a FIORA result to Spectra format.
 #' @param sp FIORA result with Annotation=TRUE.

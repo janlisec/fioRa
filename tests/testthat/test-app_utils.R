@@ -73,7 +73,7 @@ testthat::test_that(
       title = "plot_spec Standard",
       fig = function() {
         pdf(NULL)
-        fioRa:::plot_spec(s = s)
+        fioRa::plot_spec(s = s)
       }
     )
   }
@@ -90,22 +90,13 @@ testthat::test_that(
 )
 
 testthat::test_that(
-  desc = "square_subplot_coord works correctly",
-  code = {
-    # standard case
-    pdf(NULL)
-    testthat::expect_equal(fioRa:::square_subplot_coord(x=1, y=1), c(0.8, 0.8, 1.0, 1.0))
-  }
-)
-
-testthat::test_that(
   desc = "square_subplot_coord returns 4 numeric values",
   code = {
     grDevices::png(filename = tempfile(), width = 800, height = 600)
     on.exit(grDevices::dev.off())
 
     graphics::plot(1:10, 1:10)
-    coords <- square_subplot_coord(5, 5, w = 0.2)
+    coords <- fioRa:::square_subplot_coord(5, 5, w = 0.2)
 
     testthat::expect_type(coords, "double")
     testthat::expect_length(coords, 4)
@@ -119,7 +110,7 @@ testthat::test_that(
     on.exit(grDevices::dev.off())
 
     graphics::plot(0:10, 0:10)
-    coords <- square_subplot_coord(5, 5, w = 0.2)
+    coords <- fioRa:::square_subplot_coord(5, 5, w = 0.2)
 
     center_x <- (coords[1] + coords[3]) / 2
     testthat::expect_equal(center_x, 5, tolerance = 1e-6)
@@ -133,7 +124,7 @@ testthat::test_that("square_subplot_coord does not exceed usr bounds", {
   graphics::plot(0:10, 0:10)
   usr <- graphics::par("usr")
 
-  coords <- square_subplot_coord(10, 10, w = 0.5)
+  coords <- fioRa:::square_subplot_coord(10, 10, w = 0.5)
 
   testthat::expect_lte(coords[3], usr[2] + 1e-6)
   testthat::expect_lte(coords[4], usr[4] + 1e-6)
@@ -146,3 +137,17 @@ testthat::test_that(
     testthat::expect_error(fioRa:::verify_suggested("this_is_not_a_package"))
   }
 )
+
+testthat::test_that("plot_spec runs without error", {
+  s <- data.frame(
+    mz = c(100, 150, 200),
+    int = c(1, 5, 3),
+    formula = c("H2O", "C6H6", "CO2"),
+    adduct = c("[M+H]+", "[M+H]+", "[M+H]+"),
+    SMILES = c("O", "c1ccccc1", "O=C=O")
+  )
+
+  res <- fioRa::plot_spec(s, show_neutral_losses = FALSE, show_smiles = FALSE)
+  testthat::expect_s3_class(res, "data.frame")
+  testthat::expect_equal(nrow(res), 3)
+})
