@@ -206,11 +206,12 @@ page_fioRa_server <- function(id, fiora_script = "/home/shiny_test/miniforge3/en
       if (!is.null(brush)) {
         ranges$x <- c(brush$xmin, brush$xmax)
         ranges$y <- c(brush$ymin, brush$ymax)
+        message("double click in plot to zoom to brushed range: x = ", paste(signif(ranges$x, 3), collapse="-"), ", y = ", paste(signif(ranges$y, 3), collapse="-"))
       } else {
         ranges$x <- NULL
         ranges$y <- NULL
+        message("double click in plot to remove zoom")
       }
-      message("double click in plot to zoom. x = ", ranges$x, ", y = ", ranges$y)
     })
 
     output$tab <- shiny::renderTable({

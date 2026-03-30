@@ -128,20 +128,22 @@ renderSMILES <- function(smiles, kekulise=TRUE, coords=c(0,0,100,100)) {
 #' @keywords internal
 square_subplot_coord <- function(x, y, w = 0.2) {
   # get plotting device size in inch
-  device_width <- grDevices::dev.size("in")[1]
-  device_height <- grDevices::dev.size("in")[2]
+  # device_width <- grDevices::dev.size("in")[1]
+  # device_height <- grDevices::dev.size("in")[2]
+  device_width <- graphics::par("pin")[1]
+  device_height <- graphics::par("pin")[2]
 
   # calc subplot size (w of smaller side)
   subplot_size <- w * min(device_width, device_height)
 
-  # calc user coordinates
+  # calc subplot size in user coordinates
   usr <- graphics::par("usr")
   x_range <- usr[2] - usr[1]
   y_range <- usr[4] - usr[3]
   x_len <- subplot_size * x_range / device_width
   y_len <- subplot_size * y_range / device_height
 
-  # Überprüfen, ob subplot innerhalb des Plots liegt und verschieben wenn nötig
+  # check, if subplot within plot window and shift if not
   if (x + x_len/2 > usr[2]) {
     x <- usr[2] - x_len/2
   }
@@ -149,13 +151,13 @@ square_subplot_coord <- function(x, y, w = 0.2) {
     y <- usr[4] - y_len
   }
 
-  # Berechnung der Position des Subplots
+  # calc subplot position in user coordinates
   x_start <- x - x_len/2
   y_start <- y
   x_end <- x + x_len/2
   y_end <- y + y_len
 
-  # Rückgabe der Koordinaten des Subplots
+  # return subplot coordinates
   return(c(x_start, y_start, x_end, y_end))
 }
 

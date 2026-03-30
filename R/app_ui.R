@@ -6,7 +6,7 @@
 #' @noRd
 app_ui <- function(request) {
 
-  # htis is the padding definition for all panels to respect navbar and footer
+  # this is the padding definition for all panels to respect navbar and footer
   navbar_padding <- "56px"
   footer_padding <- "48px"
   nps <- paste0("padding-top: ", navbar_padding, "; padding-bottom: ", footer_padding)
@@ -62,7 +62,7 @@ app_ui <- function(request) {
             ),
             shiny::p(
               'Processing is always started using the respective button below the textbox. Processing is limited to 10 compounds.',
-              'o process larger numbers, please install ', shiny::strong("fioRa"), ' locally and use function run_script().'
+              'To process larger numbers, please install ', shiny::strong("fioRa"), ' locally and use function run_script().'
             ),
             shiny::p(
               'After the processing is finished the ', shiny::strong("output"), ' section is propagated with the results.',
