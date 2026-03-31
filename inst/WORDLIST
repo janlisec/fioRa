@@ -3,8 +3,10 @@ CCS
 CMD
 Codecov
 HCD
+InterpretMSSpectrum
 NIST
 Nowatzky
+PlotSpec
 ReadMe
 adduct
 adducts
@@ -29,5 +31,6 @@ reticulate
 selectInputWithButtons
 shinyApp
 shinyapps
+shn
 silico
 testthat

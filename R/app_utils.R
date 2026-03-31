@@ -59,6 +59,7 @@ smiles2formula <- function(smiles) {
 #'     with undefined bond orders. Older rcdk versions may behave differently.
 #' @param coords This is used to control the size of the image within the plot.
 #'     Values \code{c(xmin,ymin,xmax,ymax)}.
+#' @param xx The desired x center position (to potentially shift the subplot to).
 #' @author Emma Schymanski <emma.schymanski@@uni.lu>
 #' @details More information about aromaticity: \url{https://github.com/CDK-R/cdkr/issues/49}
 #' @examples
@@ -67,10 +68,12 @@ smiles2formula <- function(smiles) {
 #' plot.window(xlim=c(0,200), ylim=c(0,100))
 #' renderSMILES(smiles,kekulise=FALSE)
 #' renderSMILES(smiles,kekulise=TRUE)
+#' renderSMILES(smiles, coords = c(100,0,150,50))
+#' rect(100,0,150,50)
 #' @return Returns an image for use during plotting
 #' @noRd
 #' @keywords internal
-renderSMILES <- function(smiles, kekulise=TRUE, coords=c(0,0,100,100)) {
+renderSMILES <- function(smiles, kekulise=TRUE, coords=c(0,0,100,100), xx = NULL) {
   if (nchar(smiles)>1) {
     mol <- rcdk::parse.smiles(smiles,kekulise=kekulise)[[1]]
     mol <- rcdk::generate.2d.coordinates(mol)
@@ -97,21 +100,44 @@ renderSMILES <- function(smiles, kekulise=TRUE, coords=c(0,0,100,100)) {
     if (length(img)>2) {
       # make points of white color transparent
       img[,,4] <- matrix(abs(as.numeric(img[,,1]==1 & img[,,2]==1 & img[,,3]==1)-1), nrow = nrow(img[,,1]))
-      # raster image
-      #graphics::rasterImage(img, coords[1], coords[2], coords[3], coords[4])
-      #browser()
       # compute y-shift according to empty bottom rows
       empty_rows <- apply(img[,,4],1,function(x){all(x==0)})
       strip_height_percent <- 1-(table(diff(which(empty_rows)))[1])/nrow(img[,,4])
-      coords[4] <- coords[2]+(coords[4]-coords[2])*strip_height_percent
-      # shift one line of text up
-      usr <- graphics::par("usr")
-      x_range <- usr[2] - usr[1]
-      y_range <- usr[4] - usr[3]
-      coords[2] <- coords[2]+y_range/30
-      coords[4] <- coords[4]+y_range/30
-
+      if (mean(coords[c(2,4)]) < diff(graphics::par("usr")[c(3:4)])/2) {
+        coords[4] <- coords[2]+(coords[4]-coords[2])*strip_height_percent
+      } else {
+        coords[2] <- coords[4]-(coords[4]-coords[2])*strip_height_percent
+      }
       stripped_img <- img[!empty_rows,,]
+
+      # empty cols
+      empty_cols <- apply(stripped_img[, , 4], 2, function(x) { all(x == 0) })
+      if (!all(empty_cols)) {
+        strip_width_percent <- sum(!empty_cols) / length(empty_cols)
+        x_center <- mean(coords[c(1, 3)])
+        half_width_new <- (coords[3] - coords[1]) * strip_width_percent / 2
+        coords[1] <- x_center - half_width_new
+        coords[3] <- x_center + half_width_new
+        if (!is.null(xx) && abs(xx-x_center)>diff(coords[c(1,3)])/10) {
+          shft <- xx - x_center
+          coords[1] <- coords[1] + shft
+          coords[3] <- coords[3] + shft
+          # check borders
+          gp_usr <- graphics::par("usr")
+          if (coords[1] < gp_usr[1]) {
+            shft <- gp_usr[1] - coords[1]
+            coords[1] <- coords[1] + shft
+            coords[3] <- coords[3] + shft
+          }
+          if (coords[3] > gp_usr[2]) {
+            shft <- gp_usr[2] - coords[3]
+            coords[1] <- coords[1] + shft
+            coords[3] <- coords[3] + shft
+          }
+        }
+        stripped_img <- stripped_img[, !empty_cols, , drop = FALSE]
+      }
+
       graphics::rasterImage(stripped_img, coords[1], coords[2], coords[3], coords[4])
       #graphics::rect(coords[1], coords[2], coords[3], coords[4])
     }
@@ -120,46 +146,72 @@ renderSMILES <- function(smiles, kekulise=TRUE, coords=c(0,0,100,100)) {
 }
 
 #' @title Determine square_subplot_coord.
-#' @param x x coordinate.
-#' @param y y coordinate.
+#' @description Compute square subplot coordinates in user space
+#' @param x x center coordinate of square.
+#' @param y y center coordinate of square.
+#' @param xlim numeric(2); xlim of spec.
+#' @param ylim numeric(2); ylim of spec.
 #' @param w Relative proportion of figure region to cover.
 #' @return Returns coordinates for a square shape sub-plot.
 #' @noRd
 #' @keywords internal
-square_subplot_coord <- function(x, y, w = 0.2) {
-  # get plotting device size in inch
-  # device_width <- grDevices::dev.size("in")[1]
-  # device_height <- grDevices::dev.size("in")[2]
-  device_width <- graphics::par("pin")[1]
-  device_height <- graphics::par("pin")[2]
+#'
+square_subplot_coord <- function(x, y, xlim = NULL, ylim = NULL, w = 0.2) {
 
-  # calc subplot size (w of smaller side)
-  subplot_size <- w * min(device_width, device_height)
+  if (is.null(xlim)) xlim <- graphics::par("usr")[1:2]
+  if (is.null(ylim)) ylim <- graphics::par("usr")[3:4]
 
-  # calc subplot size in user coordinates
-  usr <- graphics::par("usr")
-  x_range <- usr[2] - usr[1]
-  y_range <- usr[4] - usr[3]
-  x_len <- subplot_size * x_range / device_width
-  y_len <- subplot_size * y_range / device_height
+  ## device size in inch
+  dev <- grDevices::dev.size("in")
+  device_width  <- dev[1]
+  device_height <- dev[2]
 
-  # check, if subplot within plot window and shift if not
-  if (x + x_len/2 > usr[2]) {
-    x <- usr[2] - x_len/2
-  }
-  if (y + y_len > usr[4]) {
-    y <- usr[4] - y_len
+  if (!all(is.finite(c(device_width, device_height)))) {
+    device_width  <- 1
+    device_height <- 1
   }
 
-  # calc subplot position in user coordinates
+  ## subplot size in inch
+  subplot_size_in <- w * min(device_width, device_height)
+
+  ## ranges
+  x_range <- xlim[2] - xlim[1]
+  y_range <- ylim[2] - ylim[1]
+
+  ## subplot size in user coords
+  x_len <- subplot_size_in * x_range / device_width
+  y_len <- subplot_size_in * y_range / device_height
+
+  ## target center adjustment based on location:
+  ## Compute approx text-line height in user coords
+  text_in <- graphics::par("cin")[2] * graphics::par("cex")  # text height in inch
+  text_user <- 2 * text_in * (y_range / device_height)
+
+  ## shift direction
+  mid_y <- mean(ylim)
+  if (y < mid_y) {
+    ## target is in lower half, shift subplot up
+    y <- y + text_user
+  } else {
+    ## target in upper half above, shift down
+    y <- y - text_user - y_len
+  }
+
+  ## keep inside bounds
+  if (x + x_len/2 > xlim[2]) x <- xlim[2] - x_len/2
+  if (x - x_len/2 < xlim[1]) x <- xlim[1] + x_len/2
+  if (y + y_len > ylim[2])   y <- ylim[2] - y_len
+  if (y < ylim[1])           y <- ylim[1]
+
+  ## final coords
   x_start <- x - x_len/2
+  x_end   <- x + x_len/2
   y_start <- y
-  x_end <- x + x_len/2
-  y_end <- y + y_len
+  y_end   <- y + y_len
 
-  # return subplot coordinates
-  return(c(x_start, y_start, x_end, y_end))
+  c(x_start, y_start, x_end, y_end)
 }
+
 
 #' @title add_adduct.
 #' @description Add FIORA adduct to formula.

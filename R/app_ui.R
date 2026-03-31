@@ -55,10 +55,12 @@ app_ui <- function(request) {
               shiny::a(href="https://github.com/janlisec/fioRa", target="_blank", rel="noopener noreferrer", "GitHub page"),
               'to read documentation on the', shiny::strong("fioRa"), 'package.'
             ),
-            shiny::p(
-              'Use the', shiny::strong("fioRa input"), 'section from the foldable menu on the left to specify compounds, for which you would like',
-              shiny::strong("fioRa"), 'to predict an MS2 spectrum for. Your options to provide SMILES codes are (i) by uploading a csv file,',
-              '(ii) by entering a SMILES in a simple form or (iii) by pasting directly to a textbox.'
+            shiny::HTML(
+              '<p>Use the <b>fioRa</b> input section from the foldable menu on the left to specify compounds, for which you would like',
+              '<b>fioRa</b> to predict an MS<sup>2</sup> spectrum. Your options to provide SMILES codes are by',
+              '<br> - uploading a csv file,',
+              '<br> - entering a SMILES in a simple form or',
+              '<br> - pasting directly into a textbox.</p>'
             ),
             shiny::p(
               'Processing is always started using the respective button below the textbox. Processing is limited to 10 compounds.',

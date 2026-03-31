@@ -9,7 +9,7 @@ plot_spec(s, show_neutral_losses = TRUE, show_smiles = TRUE, ...)
 \arguments{
 \item{s}{A valid spectrum as predicted by fiora.}
 
-\item{show_neutral_losses}{Connect main peaks by grey lines and annotate the
+\item{show_neutral_losses}{Connect main peaks by gray lines and annotate the
 respective sum formula of the neutral loss.}
 
 \item{show_smiles}{Overlay SMILES (if present in columns of s) in plot.}
@@ -31,8 +31,8 @@ fl <- system.file("extdata/annotated_output.mgf", package = "fioRa")
 tmp <- fioRa::read_fiora(fl = fl)
 s <- tmp[[3]][["spec"]]
 plot_spec(s = s)
-plot_spec(s = s, masslab = 0.1)
 plot_spec(s = s, show_neutral_losses = FALSE)
+plot_spec(s = s, masslab = 0.05)
 }
 \seealso{
 [InterpretMSSpectrum::PlotSpec()]

@@ -2,7 +2,7 @@
 #' @description This is a wrapper around function `InterpretMSSpectrum::PlotSpec()`
 #'     allowing to add chemical structures of MS^2 fragments to the plot.
 #' @param s A valid spectrum as predicted by fiora.
-#' @param show_neutral_losses Connect main peaks by grey lines and annotate the
+#' @param show_neutral_losses Connect main peaks by gray lines and annotate the
 #'     respective sum formula of the neutral loss.
 #' @param show_smiles Overlay SMILES (if present in columns of s) in plot.
 #' @param ... Passed on to `InterpretMSSpectrum::PlotSpec()`.
@@ -12,8 +12,8 @@
 #' tmp <- fioRa::read_fiora(fl = fl)
 #' s <- tmp[[3]][["spec"]]
 #' plot_spec(s = s)
-#' plot_spec(s = s, masslab = 0.05)
 #' plot_spec(s = s, show_neutral_losses = FALSE)
+#' plot_spec(s = s, masslab = 0.05)
 #' @return Creates an annotated plot of a mass spectrum and returns the spectrum invisibly.
 #' @seealso [InterpretMSSpectrum::PlotSpec()]
 #' @export
@@ -37,6 +37,27 @@ plot_spec <- function(s, show_neutral_losses = TRUE, show_smiles = TRUE, ...) {
   } else {
     cutoff <- 0
   }
+  if ("xlim" %in% names(dots)) {
+    if (is.null(dots$xlim)) {
+      xlim <- range(s[, "mz"], na.rm = TRUE)
+    } else {
+      xlim <- dots$xlim
+    }
+    dots$xlim <- NULL
+  } else {
+    xlim <- range(s[, "mz"], na.rm = TRUE)
+  }
+  if ("ylim" %in% names(dots)) {
+    if (is.null(dots$ylim)) {
+      ylim <- c(0, max(s[, "int"], na.rm = TRUE) * 1.05)
+    } else {
+      ylim <- dots$ylim
+    }
+    dots$ylim <- NULL
+  } else {
+    ylim <- c(0, max(s[, "int"], na.rm = TRUE) * 1.05)
+  }
+
 
   #flt <- which(s[,"int"] > 0.05*max(s[,"int"], na.rm=T))
   # keep only the SMILES with the highest intensity from a group of SMILES with identical adduct/formula combinations
@@ -68,16 +89,17 @@ plot_spec <- function(s, show_neutral_losses = TRUE, show_smiles = TRUE, ...) {
       txt = txt,
       ionization = "ESI",
       neutral_losses = neutral_losses,
-      precursor = s[nrow(s), 1]
+      precursor = s[nrow(s), 1],
+      xlim = xlim,
+      ylim = ylim
     ),
     dots  # remaining ... args to PlotSpec
   )
   do.call(InterpretMSSpectrum::PlotSpec, args)
-  #InterpretMSSpectrum::PlotSpec(x=s[,1:2], masslab = masslab, cutoff = cutoff, txt = txt, ionization="ESI", neutral_losses = neutral_losses, precursor = s[nrow(s),1], ...)
   if (show_smiles && "SMILES" %in% colnames(s)) {
     for (i in flt) {
-      #message(paste(graphics::par("usr"), collapse=", "))
-      renderSMILES(smiles = s[i,"SMILES"], coords = square_subplot_coord(x = s[i,"mz"], y = s[i,"int"], w = 0.2))
+      coords <- square_subplot_coord(x = s[i,"mz"], y = s[i,"int"], xlim = xlim+c(-1,1)*0.039*diff(xlim), ylim = ylim, w = 0.2)
+      renderSMILES(smiles = s[i,"SMILES"], coords = coords, xx = s[i,"mz"])
     }
   }
   invisible(s)
