@@ -98,8 +98,10 @@ plot_spec <- function(s, show_neutral_losses = TRUE, show_smiles = TRUE, ...) {
   do.call(InterpretMSSpectrum::PlotSpec, args)
   if (show_smiles && "SMILES" %in% colnames(s)) {
     for (i in flt) {
-      coords <- square_subplot_coord(x = s[i,"mz"], y = s[i,"int"], xlim = xlim+c(-1,1)*0.039*diff(xlim), ylim = ylim, w = 0.2)
-      renderSMILES(smiles = s[i,"SMILES"], coords = coords, xx = s[i,"mz"])
+      if (s[i,"mz"]>=xlim[1] & s[i,"mz"]<=xlim[2] & s[i,"int"]>=ylim[1] & s[i,"int"]<=ylim[2]) {
+        coords <- square_subplot_coord(x = s[i,"mz"], y = s[i,"int"], xlim = xlim+c(-1,1)*0.039*diff(xlim), ylim = ylim, w = 0.25)
+        renderSMILES(smiles = s[i,"SMILES"], coords = coords, xx = s[i,"mz"])
+      }
     }
   }
   invisible(s)

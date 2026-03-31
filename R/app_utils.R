@@ -77,7 +77,8 @@ renderSMILES <- function(smiles, kekulise=TRUE, coords=c(0,0,100,100), xx = NULL
   if (nchar(smiles)>1) {
     mol <- rcdk::parse.smiles(smiles,kekulise=kekulise)[[1]]
     mol <- rcdk::generate.2d.coordinates(mol)
-    depictor <- rcdk::get.depictor(width = 200, height = 200, zoom = 1.0, fillToFit = FALSE)
+    #depictor <- rcdk::get.depictor(width = 200, height = 200, zoom = 1.0, fillToFit = FALSE)
+    depictor <- rcdk::get.depictor(width = 300, height = 300, zoom = 1.0, fillToFit = FALSE)
     img <- tryCatch({
       (rcdk::view.image.2d(mol, depictor = depictor))
     }, error = function(e) {
