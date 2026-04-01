@@ -58,8 +58,7 @@ smiles2formula <- function(smiles) {
 #'     recommended. Setting \code{FALSE} can force rendering of invalid SMILES
 #'     with undefined bond orders. Older rcdk versions may behave differently.
 #' @param coords This is used to control the size of the image within the plot.
-#'     Values \code{c(xmin,ymin,xmax,ymax)}.
-#' @param xx The desired x center position (to potentially shift the subplot to).
+#'     Values \code{c(xmin,xmax,ymin,ymax)} in user coordinates.
 #' @author Emma Schymanski <emma.schymanski@@uni.lu>
 #' @details More information about aromaticity: \url{https://github.com/CDK-R/cdkr/issues/49}
 #' @examples
@@ -68,12 +67,13 @@ smiles2formula <- function(smiles) {
 #' plot.window(xlim=c(0,200), ylim=c(0,100))
 #' renderSMILES(smiles,kekulise=FALSE)
 #' renderSMILES(smiles,kekulise=TRUE)
-#' renderSMILES(smiles, coords = c(100,0,150,50))
+#' renderSMILES(smiles, coords = c(100,150,0,50))
 #' rect(100,0,150,50)
 #' @return Returns an image for use during plotting
 #' @noRd
 #' @keywords internal
-renderSMILES <- function(smiles, kekulise=TRUE, coords=c(0,0,100,100), xx = NULL) {
+renderSMILES <- function(smiles, kekulise=TRUE, coords=c(0,100,0,100), gp_usr = NULL) {
+  if (is.null(gp_usr)) gp_usr <- graphics::par("usr")
   if (nchar(smiles)>1) {
     mol <- rcdk::parse.smiles(smiles,kekulise=kekulise)[[1]]
     mol <- rcdk::generate.2d.coordinates(mol)
@@ -90,7 +90,9 @@ renderSMILES <- function(smiles, kekulise=TRUE, coords=c(0,0,100,100), xx = NULL
       mol <- rcdk::parse.smiles(smiles,kekulise=FALSE)[[1]]
       mol <- rcdk::parse.smiles(smiles,kekulise=kekulise)[[1]]
       mol <- rcdk::generate.2d.coordinates(mol)
-      depictor <- rcdk::get.depictor(width = coords[3]-coords[1], height = coords[4]-coords[2], zoom = 1.0, fillToFit = FALSE)
+      x_len <- diff(coords[1:2])
+      y_len <- diff(coords[3:4])
+      depictor <- rcdk::get.depictor(width = x_len, height = y_len, zoom = 1.0, fillToFit = FALSE)
       img <- tryCatch({
         (rcdk::view.image.2d(mol, depictor = depictor))
       }, error = function(e) {
@@ -99,48 +101,57 @@ renderSMILES <- function(smiles, kekulise=TRUE, coords=c(0,0,100,100), xx = NULL
       })
     }
     if (length(img)>2) {
+
       # make points of white color transparent
       img[,,4] <- matrix(abs(as.numeric(img[,,1]==1 & img[,,2]==1 & img[,,3]==1)-1), nrow = nrow(img[,,1]))
-      # compute y-shift according to empty bottom rows
-      empty_rows <- apply(img[,,4],1,function(x){all(x==0)})
+
+      xx <- mean(coords[c(1,2)])
+      x_len <- diff(coords[1:2])
+      yy <- mean(coords[c(3,4)])
+      y_len <- diff(coords[3:4])
+
+      # remove empty rows and apply y-shift
+      empty_rows <- apply(img[,,4], 1, function (x) { all(x==0) })
       strip_height_percent <- 1-(table(diff(which(empty_rows)))[1])/nrow(img[,,4])
-      if (mean(coords[c(2,4)]) < diff(graphics::par("usr")[c(3:4)])/2) {
-        coords[4] <- coords[2]+(coords[4]-coords[2])*strip_height_percent
-      } else {
-        coords[2] <- coords[4]-(coords[4]-coords[2])*strip_height_percent
-      }
+      y_len <- y_len * strip_height_percent
+      # that would be strict with respect to upper/lower half
+      # but IMSS is determining sum formula annotation according to 0.9*max(y)
+      # hence this is adjusted here to 0.75*max
+      peak_in_upper_half <- yy > mean(gp_usr[c(3:4)])
+
+      ## target center adjustment based on location:
+      ## y-location of subplot
+      lh <- diff(gp_usr[3:4])/30
+      #browser()
+      dont_account_for_lh <- peak_in_upper_half && yy < (gp_usr[4] - 0.1 * diff(gp_usr[3:4]))
+      # get adjusted bottom border to account for stripping
+      yy <- yy + ifelse(peak_in_upper_half, -1, 1) * ifelse(dont_account_for_lh, 0.5, 1.5) * lh + ifelse(peak_in_upper_half, -1, 0) * y_len
+      coords[3] <- yy
+      coords[4] <- yy + y_len
       stripped_img <- img[!empty_rows,,]
 
-      # empty cols
+      # remove empty cols and apply x-shift
       empty_cols <- apply(stripped_img[, , 4], 2, function(x) { all(x == 0) })
       if (!all(empty_cols)) {
         strip_width_percent <- sum(!empty_cols) / length(empty_cols)
-        x_center <- mean(coords[c(1, 3)])
-        half_width_new <- (coords[3] - coords[1]) * strip_width_percent / 2
-        coords[1] <- x_center - half_width_new
-        coords[3] <- x_center + half_width_new
-        if (!is.null(xx) && abs(xx-x_center)>diff(coords[c(1,3)])/10) {
-          shft <- xx - x_center
+        x_len <- diff(coords[1:2]) * strip_width_percent
+        coords[1] <- xx - x_len/2
+        coords[2] <- xx + x_len/2
+        if (coords[1] < gp_usr[1]) {
+          shft <- gp_usr[1] - coords[1]
           coords[1] <- coords[1] + shft
-          coords[3] <- coords[3] + shft
-          # check borders
-          gp_usr <- graphics::par("usr")
-          if (coords[1] < gp_usr[1]) {
-            shft <- gp_usr[1] - coords[1]
-            coords[1] <- coords[1] + shft
-            coords[3] <- coords[3] + shft
-          }
-          if (coords[3] > gp_usr[2]) {
-            shft <- gp_usr[2] - coords[3]
-            coords[1] <- coords[1] + shft
-            coords[3] <- coords[3] + shft
-          }
+          coords[2] <- coords[2] + shft
+        }
+        if (coords[2] > gp_usr[2]) {
+          shft <- gp_usr[2] - coords[2]
+          coords[1] <- coords[1] + shft
+          coords[2] <- coords[2] + shft
         }
         stripped_img <- stripped_img[, !empty_cols, , drop = FALSE]
       }
 
-      graphics::rasterImage(stripped_img, coords[1], coords[2], coords[3], coords[4])
-      #graphics::rect(coords[1], coords[2], coords[3], coords[4])
+      graphics::rasterImage(stripped_img, coords[1], coords[3], coords[2], coords[4])
+      #graphics::rect(coords[1], coords[3], coords[2], coords[4])
     }
   }
   invisible(img)
@@ -150,67 +161,60 @@ renderSMILES <- function(smiles, kekulise=TRUE, coords=c(0,0,100,100), xx = NULL
 #' @description Compute square subplot coordinates in user space
 #' @param x x center coordinate of square.
 #' @param y y center coordinate of square.
-#' @param xlim numeric(2); xlim of spec.
-#' @param ylim numeric(2); ylim of spec.
+#' @param gp_usr numeric(4); c(xlim, ylim) of spec.
 #' @param w Relative proportion of figure region to cover.
 #' @return Returns coordinates for a square shape sub-plot.
+#' @examples
+#' square_subplot_coord(x=50, y=50, gp_usr=c(0,100,0,100))
+#'
 #' @noRd
 #' @keywords internal
 #'
-square_subplot_coord <- function(x, y, xlim = NULL, ylim = NULL, w = 0.2) {
+square_subplot_coord <- function(x, y, gp_usr = NULL, w = 0.2) {
 
-  if (is.null(xlim)) xlim <- graphics::par("usr")[1:2]
-  if (is.null(ylim)) ylim <- graphics::par("usr")[3:4]
+  if (is.null(gp_usr)) gp_usr <- graphics::par("usr")
+  xlim <- gp_usr[1:2]
+  ylim <- gp_usr[3:4]
 
   ## device size in inch
-  dev <- grDevices::dev.size("in")
-  device_width  <- dev[1]
-  device_height <- dev[2]
-
-  if (!all(is.finite(c(device_width, device_height)))) {
-    device_width  <- 1
-    device_height <- 1
-  }
+  dev_s <- grDevices::dev.size("in")
+  if (!all(is.finite(dev_s))) dev_s <- c(1,1)
 
   ## subplot size in inch
-  subplot_size_in <- w * min(device_width, device_height)
-
-  ## ranges
-  x_range <- xlim[2] - xlim[1]
-  y_range <- ylim[2] - ylim[1]
+  subplot_size_in <- w * min(dev_s)
 
   ## subplot size in user coords
-  x_len <- subplot_size_in * x_range / device_width
-  y_len <- subplot_size_in * y_range / device_height
+  x_len <- subplot_size_in * diff(xlim) / dev_s[1]
+  y_len <- subplot_size_in * diff(ylim) / dev_s[2]
 
-  ## target center adjustment based on location:
-  ## Compute approx text-line height in user coords
-  text_in <- graphics::par("cin")[2] * graphics::par("cex")  # text height in inch
-  text_user <- 2 * text_in * (y_range / device_height)
-
-  ## shift direction
-  mid_y <- mean(ylim)
-  if (y < mid_y) {
-    ## target is in lower half, shift subplot up
-    y <- y + text_user
-  } else {
-    ## target in upper half above, shift down
-    y <- y - text_user - y_len
-  }
-
-  ## keep inside bounds
-  if (x + x_len/2 > xlim[2]) x <- xlim[2] - x_len/2
-  if (x - x_len/2 < xlim[1]) x <- xlim[1] + x_len/2
-  if (y + y_len > ylim[2])   y <- ylim[2] - y_len
-  if (y < ylim[1])           y <- ylim[1]
+  # ## target center adjustment based on location:
+  # ## Compute approx text-line height in user coords
+  # text_in <- graphics::par("cin")[2] * graphics::par("cex")  # text height in inch
+  # text_user <- 2 * text_in * (diff(ylim) / dev_s[2])
+  #
+  # ## shift direction
+  # mid_y <- mean(ylim)
+  # if (y < mid_y) {
+  #   ## target is in lower half, shift subplot up
+  #   y <- y + text_user
+  # } else {
+  #   ## target in upper half above, shift down
+  #   y <- y - text_user - y_len
+  # }
+  #
+  # ## keep inside bounds
+  # if (x + x_len/2 > xlim[2]) x <- xlim[2] - x_len/2
+  # if (x - x_len/2 < xlim[1]) x <- xlim[1] + x_len/2
+  # if (y + y_len > ylim[2])   y <- ylim[2] - y_len
+  # if (y < ylim[1])           y <- ylim[1]
 
   ## final coords
   x_start <- x - x_len/2
   x_end   <- x + x_len/2
-  y_start <- y
-  y_end   <- y + y_len
+  y_start <- y - y_len/2
+  y_end   <- y + y_len/2
 
-  c(x_start, y_start, x_end, y_end)
+  c(x_start, x_end, y_start, y_end)
 }
 
 

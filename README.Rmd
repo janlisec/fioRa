@@ -89,13 +89,15 @@ x <- data.frame(
 fioRa::run_script(x = x, annotation = TRUE)
 ```
 
+On your local system the input data frame can have as many rows as you like.
+
 You can use the exported functions `read_fiora()` and `plot_spec()` to import 
 and plot **FIORA** results
 
 ```{r plot_spec, eval = TRUE, fig.retina=4}
 fl <- system.file("extdata/annotated_output.mgf", package = "fioRa")
 tmp <- fioRa::read_fiora(fl = fl)
-s <- tmp[[3]][["spec"]]
+s <- tmp[[1]][["spec"]]
 fioRa::plot_spec(s = s, masslab = 0.05)
 ```
 

@@ -49,13 +49,13 @@ plot_spec <- function(s, show_neutral_losses = TRUE, show_smiles = TRUE, ...) {
   }
   if ("ylim" %in% names(dots)) {
     if (is.null(dots$ylim)) {
-      ylim <- c(0, max(s[, "int"], na.rm = TRUE) * 1.05)
+      ylim <- c(0, max(s[, "int"], na.rm = TRUE))
     } else {
       ylim <- dots$ylim
     }
     dots$ylim <- NULL
   } else {
-    ylim <- c(0, max(s[, "int"], na.rm = TRUE) * 1.05)
+    ylim <- c(0, max(s[, "int"], na.rm = TRUE))
   }
 
 
@@ -99,8 +99,9 @@ plot_spec <- function(s, show_neutral_losses = TRUE, show_smiles = TRUE, ...) {
   if (show_smiles && "SMILES" %in% colnames(s)) {
     for (i in flt) {
       if (s[i,"mz"]>=xlim[1] & s[i,"mz"]<=xlim[2] & s[i,"int"]>=ylim[1] & s[i,"int"]<=ylim[2]) {
-        coords <- square_subplot_coord(x = s[i,"mz"], y = s[i,"int"], xlim = xlim+c(-1,1)*0.039*diff(xlim), ylim = ylim, w = 0.25)
-        renderSMILES(smiles = s[i,"SMILES"], coords = coords, xx = s[i,"mz"])
+        gp_usr <- c(xlim+c(-1,1)*0.039*diff(xlim), ylim+c(-1,1)*0.039*diff(ylim))
+        coords <- square_subplot_coord(x = s[i,"mz"], y = s[i,"int"], gp_usr = gp_usr, w = 0.25)
+        renderSMILES(smiles = s[i,"SMILES"], coords = coords, gp_usr = gp_usr)
       }
     }
   }

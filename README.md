@@ -133,6 +133,9 @@ fioRa::run_script(x = x, annotation = TRUE)
 #> 3         1
 ```
 
+On your local system the input data frame can have as many rows as you
+like.
+
 You can use the exported functions `read_fiora()` and `plot_spec()` to
 import and plot **FIORA** results
 
@@ -140,7 +143,7 @@ import and plot **FIORA** results
 fl <- system.file("extdata/annotated_output.mgf", package = "fioRa")
 tmp <- fioRa::read_fiora(fl = fl)
 #> Adduct definition and formula do not match (insufficient number of H); fml = H2O3S; adduct = [M-3H]-
-s <- tmp[[3]][["spec"]]
+s <- tmp[[1]][["spec"]]
 fioRa::plot_spec(s = s, masslab = 0.05)
 ```
 

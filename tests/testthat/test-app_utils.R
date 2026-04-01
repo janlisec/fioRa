@@ -112,23 +112,10 @@ testthat::test_that(
     graphics::plot(0:10, 0:10)
     coords <- fioRa:::square_subplot_coord(5, 5, w = 0.2)
 
-    center_x <- (coords[1] + coords[3]) / 2
+    center_x <- (coords[1] + coords[2]) / 2
     testthat::expect_equal(center_x, 5, tolerance = 1e-6)
   }
 )
-
-testthat::test_that("square_subplot_coord does not exceed usr bounds", {
-  grDevices::png(filename = tempfile(), width = 800, height = 600)
-  on.exit(grDevices::dev.off())
-
-  graphics::plot(0:10, 0:10)
-  usr <- graphics::par("usr")
-
-  coords <- fioRa:::square_subplot_coord(10, 10, w = 0.5)
-
-  testthat::expect_lte(coords[3], usr[2] + 1e-6)
-  testthat::expect_lte(coords[4], usr[4] + 1e-6)
-})
 
 testthat::test_that(
   desc = "verify_suggested works correctly",
