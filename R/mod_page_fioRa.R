@@ -99,7 +99,8 @@ page_fioRa_ui <- function(id) {
           sidebar = bslib::sidebar(
             id = ns("sidebar_spec"),
             position = "right", open = FALSE, width = 480,
-            shiny::tableOutput(outputId = ns("tab"))
+            shiny::tableOutput(outputId = ns("tab")),
+            shiny::uiOutput(outputId = ns("tmp"))
           ),
           style = "resize:vertical;",
           shiny::plotOutput(
@@ -193,6 +194,13 @@ page_fioRa_server <- function(id, fiora_script = "/home/shiny_test/miniforge3/en
     # Single zoomable plot (on left)
     ranges <- reactiveValues(x = NULL, y = NULL)
 
+    output$tmp <- shiny::renderUI({
+      req(ranges$x, ranges$y)
+      shiny::HTML(
+        paste("current zoom:<br>x = ", paste(signif(ranges$x, 3), collapse="-"), "<br>y = ", paste(signif(ranges$y, 3), collapse="-"))
+      )
+    })
+
     output$spec <- shiny::renderPlot({
       shiny::validate(shiny::need(rv$res, "Spectrum plot will be shown after calculation is finished"))
       req(rv$name())
@@ -206,11 +214,11 @@ page_fioRa_server <- function(id, fiora_script = "/home/shiny_test/miniforge3/en
       if (!is.null(brush)) {
         ranges$x <- c(brush$xmin, brush$xmax)
         ranges$y <- c(brush$ymin, brush$ymax)
-        message("double click in plot to zoom to brushed range: x = ", paste(signif(ranges$x, 3), collapse="-"), ", y = ", paste(signif(ranges$y, 3), collapse="-"))
+        #message("double click in plot to zoom to brushed range: x = ", paste(signif(ranges$x, 3), collapse="-"), ", y = ", paste(signif(ranges$y, 3), collapse="-"))
       } else {
         ranges$x <- NULL
         ranges$y <- NULL
-        message("double click in plot to remove zoom")
+        #message("double click in plot to remove zoom")
       }
     })
 
