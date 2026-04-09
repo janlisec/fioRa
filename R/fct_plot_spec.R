@@ -58,8 +58,6 @@ plot_spec <- function(s, show_neutral_losses = TRUE, show_smiles = TRUE, ...) {
     ylim <- c(0, max(s[, "int"], na.rm = TRUE))
   }
 
-
-  #flt <- which(s[,"int"] > 0.05*max(s[,"int"], na.rm=T))
   # keep only the SMILES with the highest intensity from a group of SMILES with identical adduct/formula combinations
   s <- combine_isomers(s=s)
   s <- s[order(s[,"mz"]),]
@@ -80,6 +78,13 @@ plot_spec <- function(s, show_neutral_losses = TRUE, show_smiles = TRUE, ...) {
   if (show_neutral_losses && length(flt)>=2) {
     neutral_losses <- get_neutral_loss_df(s = s[flt,])
   }
+
+
+  # set "mar" similar to what PlotSpec does to minimize/eliminate on.exit effects
+  opar_mar <- graphics::par("mar")
+  on.exit(graphics::par("mar" = opar_mar), add = TRUE)
+  graphics::par("mar" = c(2, 2, 0.5, 0) + 0.5)
+
   # prepare function call
   args <- c(
     list(
@@ -95,8 +100,21 @@ plot_spec <- function(s, show_neutral_losses = TRUE, show_smiles = TRUE, ...) {
     ),
     dots  # remaining ... args to PlotSpec
   )
+
+  # b <- par_snapshot()
   do.call(InterpretMSSpectrum::PlotSpec, args)
+  # a <- par_snapshot()
+  # print(par_diff(b, a))
+  #
+  # message("mfg: ", paste(graphics::par("mfg"), collapse = ", "))
+  # message("usr: ", paste(signif(graphics::par("usr"), 4), collapse = ", "))
+
   if (show_smiles && "SMILES" %in% colnames(s)) {
+
+    # # force user coordinates
+    # graphics::par(new = TRUE)
+    # graphics::plot.window(xlim = xlim, ylim = ylim)
+
     for (i in flt) {
       if (s[i,"mz"]>=xlim[1] & s[i,"mz"]<=xlim[2] & s[i,"int"]>=ylim[1] & s[i,"int"]<=ylim[2]) {
         gp_usr <- c(xlim+c(-1,1)*0.039*diff(xlim), ylim+c(-1,1)*0.039*diff(ylim))
@@ -105,6 +123,14 @@ plot_spec <- function(s, show_neutral_losses = TRUE, show_smiles = TRUE, ...) {
       }
     }
   }
+
+  # b <- par_snapshot()
+  # print(par_diff(a, b))
+
+  # force user coordinates
+  graphics::par(new = TRUE)
+  graphics::plot.window(xlim = xlim, ylim = ylim)
+
   invisible(s)
 }
 

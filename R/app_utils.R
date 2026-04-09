@@ -150,8 +150,8 @@ renderSMILES <- function(smiles, kekulise=TRUE, coords=c(0,100,0,100), gp_usr = 
         stripped_img <- stripped_img[, !empty_cols, , drop = FALSE]
       }
 
+      # graphics::rect(coords[1], coords[3], coords[2], coords[4])
       graphics::rasterImage(stripped_img, coords[1], coords[3], coords[2], coords[4])
-      #graphics::rect(coords[1], coords[3], coords[2], coords[4])
     }
   }
   invisible(img)
@@ -502,4 +502,64 @@ is_valid_path <- function(x) {
     suppressWarnings(normalizePath(x, winslash = "/", mustWork = FALSE))
     TRUE
   }, error = function(e) FALSE)
+}
+
+
+#' Snapshot selected base graphics parameters
+#'
+#' @param keys character vector of par names.
+#'
+#' @return Named list of par values.
+#' @keywords internal
+#' @noRd
+#'
+#' @examples
+#' grDevices::png(tempfile(), 800, 600)
+#' on.exit(grDevices::dev.off(), add = TRUE)
+#' before <- par_snapshot()
+#' graphics::par(mar = c(2, 2, 0.5, 0) + 0.5)
+#' after <- par_snapshot()
+#' names(par_diff(before, after))
+par_snapshot <- function(keys = c("mar", "mai", "plt", "pin", "usr", "xaxs", "yaxs")) {
+  out <- vector("list", length(keys))
+  names(out) <- keys
+  for (k in keys) {
+    out[[k]] <- graphics::par(k)
+  }
+  out
+}
+
+#' Diff two par snapshots
+#'
+#' @param before snapshot list from par_snapshot()
+#' @param after snapshot list from par_snapshot()
+#' @param tol numeric tolerance for numeric comparisons
+#'
+#' @return Named list of changed entries (before/after).
+#' @keywords internal
+#' @noRd
+#'
+#' @examples
+#' grDevices::png(tempfile(), 800, 600)
+#' on.exit(grDevices::dev.off(), add = TRUE)
+#' b <- par_snapshot()
+#' graphics::par(mar = c(2, 2, 0.5, 0) + 0.5)
+#' a <- par_snapshot()
+#' par_diff(b, a)
+par_diff <- function(before, after, tol = 1e-10) {
+  changed <- list()
+  for (nm in intersect(names(before), names(after))) {
+    b <- before[[nm]]
+    a <- after[[nm]]
+    same <- FALSE
+    if (is.numeric(b) && is.numeric(a) && length(b) == length(a)) {
+      same <- all(abs(b - a) < tol)
+    } else {
+      same <- identical(b, a)
+    }
+    if (!same) {
+      changed[[nm]] <- list(before = b, after = a)
+    }
+  }
+  changed
 }
