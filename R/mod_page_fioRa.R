@@ -204,6 +204,10 @@ page_fioRa_server <- function(id, fiora_script = "/home/shiny_test/miniforge3/en
     output$spec <- shiny::renderPlot({
       shiny::validate(shiny::need(rv$res, "Spectrum plot will be shown after calculation is finished"))
       req(rv$name())
+      # set "mar" similar to what PlotSpec would do
+      #opar_mar <- graphics::par("mar")
+      #on.exit(graphics::par("mar" = opar_mar), add = TRUE)
+      graphics::par("mar" = c(2, 2, 0.5, 0) + 0.5)
       plot_spec(s = rv$res[[rv$name()]][["spec"]], show_neutral_losses = "losses" %in% input$plot_opt, show_smiles = "smiles" %in% input$plot_opt, masslab = as.numeric(input$masslab), xlim = ranges$x, ylim = ranges$y)
     }, res = 72*1.5)
 

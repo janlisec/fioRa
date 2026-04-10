@@ -1,7 +1,7 @@
 Package: fioRa
 Title: Mass-Spectra Prediction Using the FIORA Model
-Version: 0.3.14
-Date: 2026-04-09
+Version: 0.3.15
+Date: 2026-04-10
 Authors@R: 
     person("Jan", "Lisec", , "jan.lisec@bam.de", role = c("aut", "cre"))
 Description: Provides a wrapper for the python module 'FIORA' as well as a 
@@ -14,7 +14,7 @@ Imports:
     bslib,
     config,
     golem,
-    InterpretMSSpectrum,
+    InterpretMSSpectrum (>= 1.5.3),
     rcdk,
     shiny,
     shinyjs,

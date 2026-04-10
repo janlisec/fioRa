@@ -32,7 +32,7 @@ tmp <- fioRa::read_fiora(fl = fl)
 s <- tmp[[3]][["spec"]]
 plot_spec(s = s)
 plot_spec(s = s, show_neutral_losses = FALSE)
-plot_spec(s = s, masslab = 0.05)
+plot_spec(s = s, masslab = 0.05, xlim=c(150, 200))
 }
 \seealso{
 [InterpretMSSpectrum::PlotSpec()]

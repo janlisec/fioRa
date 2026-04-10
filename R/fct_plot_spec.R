@@ -13,7 +13,7 @@
 #' s <- tmp[[3]][["spec"]]
 #' plot_spec(s = s)
 #' plot_spec(s = s, show_neutral_losses = FALSE)
-#' plot_spec(s = s, masslab = 0.05)
+#' plot_spec(s = s, masslab = 0.05, xlim=c(150, 200))
 #' @return Creates an annotated plot of a mass spectrum and returns the spectrum invisibly.
 #' @seealso [InterpretMSSpectrum::PlotSpec()]
 #' @export
@@ -62,28 +62,40 @@ plot_spec <- function(s, show_neutral_losses = TRUE, show_smiles = TRUE, ...) {
   s <- combine_isomers(s=s)
   s <- s[order(s[,"mz"]),]
   rownames(s) <- 1:nrow(s)
+
   # get the peaks with annotatable sum formulas
   flt <- sort(as.numeric(sapply(split(s, s[,"formula"]), function(x) { rownames(x)[which.max(x[,"int"])] })))
-  # limit to those above a relative int threshold
+
+  # limit annotation to those above a relative int threshold
   flt <- flt[s[flt,"int"]>=masslab*max(s[flt,"int"])]
+
+  # limit annotation to peaks within plot mz range
+  flt <- flt[s[flt,"mz"]>=min(xlim) & s[flt,"mz"]<=max(xlim)]
+  flt <- flt[s[flt,"int"]>=min(ylim) & s[flt,"int"]<=max(ylim)]
+
   # correct formula by adduct information for number of H and filter invalid combinations
-  for (i in flt) s[i,"formula"] <- add_adduct(s[i,"formula"], s[i,"adduct"])
-  flt <- flt[!is.na(s[flt,"formula"])]
-  txt <- data.frame("x"=s[flt,"mz"], "txt"=s[flt,"formula"], "expr"=TRUE)
-  txt$txt <- sapply(txt$txt, function(x) {
-    x <- cce(x = x)
-    paste(names(x), sapply(x, function(n) { if(n==1) "" else paste0("[",n,"]")}), sep="", collapse="~")
-  })
+  if (length(flt)>=1) {
+    for (i in flt) s[i,"formula"] <- add_adduct(s[i,"formula"], s[i,"adduct"])
+    flt <- flt[!is.na(s[flt,"formula"])]
+    txt <- data.frame("x"=s[flt,"mz"], "txt"=s[flt,"formula"], "expr"=TRUE)
+    txt$txt <- sapply(txt$txt, function(x) {
+      x <- cce(x = x)
+      paste(names(x), sapply(x, function(n) { if(n==1) "" else paste0("[",n,"]")}), sep="", collapse="~")
+    })
+
+    # attach SMILES codes for structure plotting
+    if (show_smiles && "SMILES" %in% colnames(s)) {
+      txt[,"SMILES"] <- s[flt,"SMILES"]
+    }
+  } else {
+    txt <- NULL
+  }
+
+  # define neutral_losses
   neutral_losses <- data.frame("Name"="", "Formula"="", "Mass"=0L)
   if (show_neutral_losses && length(flt)>=2) {
     neutral_losses <- get_neutral_loss_df(s = s[flt,])
   }
-
-
-  # set "mar" similar to what PlotSpec does to minimize/eliminate on.exit effects
-  opar_mar <- graphics::par("mar")
-  on.exit(graphics::par("mar" = opar_mar), add = TRUE)
-  graphics::par("mar" = c(2, 2, 0.5, 0) + 0.5)
 
   # prepare function call
   args <- c(
@@ -96,40 +108,12 @@ plot_spec <- function(s, show_neutral_losses = TRUE, show_smiles = TRUE, ...) {
       neutral_losses = neutral_losses,
       precursor = s[nrow(s), 1],
       xlim = xlim,
-      ylim = ylim
+      ylim = ylim,
+      mar = NULL
     ),
     dots  # remaining ... args to PlotSpec
   )
-
-  # b <- par_snapshot()
   do.call(InterpretMSSpectrum::PlotSpec, args)
-  # a <- par_snapshot()
-  # print(par_diff(b, a))
-  #
-  # message("mfg: ", paste(graphics::par("mfg"), collapse = ", "))
-  # message("usr: ", paste(signif(graphics::par("usr"), 4), collapse = ", "))
-
-  if (show_smiles && "SMILES" %in% colnames(s)) {
-
-    # # force user coordinates
-    # graphics::par(new = TRUE)
-    # graphics::plot.window(xlim = xlim, ylim = ylim)
-
-    for (i in flt) {
-      if (s[i,"mz"]>=xlim[1] & s[i,"mz"]<=xlim[2] & s[i,"int"]>=ylim[1] & s[i,"int"]<=ylim[2]) {
-        gp_usr <- c(xlim+c(-1,1)*0.039*diff(xlim), ylim+c(-1,1)*0.039*diff(ylim))
-        coords <- square_subplot_coord(x = s[i,"mz"], y = s[i,"int"], gp_usr = gp_usr, w = 0.25)
-        renderSMILES(smiles = s[i,"SMILES"], coords = coords, gp_usr = gp_usr)
-      }
-    }
-  }
-
-  # b <- par_snapshot()
-  # print(par_diff(a, b))
-
-  # force user coordinates
-  graphics::par(new = TRUE)
-  graphics::plot.window(xlim = xlim, ylim = ylim)
 
   invisible(s)
 }
