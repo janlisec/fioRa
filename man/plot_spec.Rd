@@ -4,7 +4,7 @@
 \alias{plot_spec}
 \title{Plot MS^2 spectrum.}
 \usage{
-plot_spec(s, show_neutral_losses = TRUE, show_smiles = TRUE, ...)
+plot_spec(s, show_neutral_losses = TRUE, smiles_size = 0.3, ...)
 }
 \arguments{
 \item{s}{A valid spectrum as predicted by fiora.}
@@ -12,7 +12,7 @@ plot_spec(s, show_neutral_losses = TRUE, show_smiles = TRUE, ...)
 \item{show_neutral_losses}{Connect main peaks by gray lines and annotate the
 respective sum formula of the neutral loss.}
 
-\item{show_smiles}{Overlay SMILES (if present in columns of s) in plot.}
+\item{smiles_size}{Overlay SMILES (if present in columns of s) in plot.}
 
 \item{...}{Passed on to `InterpretMSSpectrum::PlotSpec()`.}
 }

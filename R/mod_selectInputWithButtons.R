@@ -13,8 +13,8 @@
 #'       fioRa:::selectInputWithButtonsUI(id = "test")
 #'     ),
 #'     server = function(input, output, session) {
-#'       #choices <- shiny::reactiveVal(c("A","123","ABCDEFGHIJKLMNOPQRSTUVWXYZ"))
-#'       choices <- shiny::reactiveVal(c("A","123","Z"))
+#'       choices <- shiny::reactiveVal(c("A","123","ABCDEFGHIJKLMNOPQRSTUVWXYZ"))
+#'       #choices <- shiny::reactiveVal(c("A","123","Example_0"))
 #'       x <- fioRa:::selectInputWithButtonsServer(id = "test", choices = choices)
 #'       shiny::observeEvent(x(), { message(x()) }, ignoreNULL = TRUE)
 #'     }
@@ -33,9 +33,25 @@ selectInputWithButtonsUI <- function(id, label = NULL) {
           display: flex;
           align-items: flex-start;
           gap: 2px;
+          max-width: 100%;
         }
+
+        /* Let the select container shrink/grow properly in flex rows */
+        .select-nav .shiny-input-container {
+          flex: 1 1 auto;
+          min-width: 0;     /* critical for flex shrink */
+          width: auto;      /* override Shiny/Bootstrap 100% width tendencies */
+          margin-bottom: 0; /* avoid extra vertical spacing in tight headers */
+        }
+
+        /* Make the <select> itself take the container width */
+        .select-nav select {
+          width: 100%;
+        }
+
         .arrow-column {
           display: flex;
+          flex: 0 0 auto;
           flex-direction: column;
           gap: 2px;
         }

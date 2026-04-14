@@ -4,7 +4,7 @@
 #' @param s A valid spectrum as predicted by fiora.
 #' @param show_neutral_losses Connect main peaks by gray lines and annotate the
 #'     respective sum formula of the neutral loss.
-#' @param show_smiles Overlay SMILES (if present in columns of s) in plot.
+#' @param smiles_size Overlay SMILES (if present in columns of s) in plot.
 #' @param ... Passed on to `InterpretMSSpectrum::PlotSpec()`.
 #' @details See examples and documentation of `InterpretMSSpectrum::PlotSpec()`.
 #' @examples
@@ -18,7 +18,7 @@
 #' @seealso [InterpretMSSpectrum::PlotSpec()]
 #' @export
 #'
-plot_spec <- function(s, show_neutral_losses = TRUE, show_smiles = TRUE, ...) {
+plot_spec <- function(s, show_neutral_losses = TRUE, smiles_size = 0.3, ...) {
   verify_suggested(pkg = c("rcdk", "InterpretMSSpectrum"))
 
   # args to PlotSpec provided by user
@@ -47,11 +47,14 @@ plot_spec <- function(s, show_neutral_losses = TRUE, show_smiles = TRUE, ...) {
   } else {
     xlim <- range(s[, "mz"], na.rm = TRUE)
   }
+  xlim <- c(floor(xlim[1]), ceiling(xlim[2]))
   if ("ylim" %in% names(dots)) {
     if (is.null(dots$ylim)) {
       ylim <- c(0, max(s[, "int"], na.rm = TRUE))
     } else {
       ylim <- dots$ylim
+      if (ylim[1]<0) ylim[1] <- 0 # reset lower limit to 0 if user zoom in negative area
+      if (ylim[2]>max(s[, "int"], na.rm = TRUE)) ylim[2] <- max(s[, "int"], na.rm = TRUE) # reset upper limit to max(int) if user zoom above max value
     }
     dots$ylim <- NULL
   } else {
@@ -84,8 +87,9 @@ plot_spec <- function(s, show_neutral_losses = TRUE, show_smiles = TRUE, ...) {
     })
 
     # attach SMILES codes for structure plotting
-    if (show_smiles && "SMILES" %in% colnames(s)) {
+    if (is.numeric(smiles_size) && smiles_size>0 && smiles_size<=0.5 && "SMILES" %in% colnames(s)) {
       txt[,"SMILES"] <- s[flt,"SMILES"]
+      txt[,"w"] <- rep(smiles_size, nrow(txt))
     }
   } else {
     txt <- NULL

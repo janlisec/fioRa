@@ -29,7 +29,7 @@ testthat::test_that(
   desc = "estimateSelectWidth works correctly",
   code = {
     long_string <- paste(LETTERS, collapse="")
-    out_exp <- paste0(10+16+nchar(long_string)*8, "px")
+    out_exp <- paste0(40+16+2+nchar(long_string)*10, "px")
     testthat::expect_equal(fioRa:::estimateSelectWidth(NULL), "120px")
     testthat::expect_equal(fioRa:::estimateSelectWidth(c("1","2")), "120px")
     testthat::expect_equal(fioRa:::estimateSelectWidth(c("1", long_string)), out_exp)
@@ -80,7 +80,7 @@ testthat::test_that("plot_spec runs without error", {
     SMILES = c("O", "c1ccccc1", "O=C=O")
   )
 
-  res <- fioRa::plot_spec(s, show_neutral_losses = FALSE, show_smiles = FALSE)
+  res <- fioRa::plot_spec(s, show_neutral_losses = FALSE, smiles_size = 0)
   testthat::expect_s3_class(res, "data.frame")
   testthat::expect_equal(nrow(res), 3)
 })

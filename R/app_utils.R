@@ -280,10 +280,10 @@ ldply_base <- function(.data, .fun = identity) {
 #'
 #' @keywords internal
 #' @noRd
-estimateSelectWidth <- function(choices, min_width = 120, max_width = 300, px_per_char = 8) {
+estimateSelectWidth <- function(choices, min_width = 120, max_width = 340, px_per_char = 10) {
   if (length(choices) == 0) return(paste0(min_width, "px"))
   max_chars <- max(nchar(choices), na.rm = TRUE)
-  estimated <- 10 + 16 + (max_chars * px_per_char)
+  estimated <- 40 + 16 + 2 + (max_chars * px_per_char)
   width <- min(max(estimated, min_width), max_width)
   paste0(width, "px")
 }

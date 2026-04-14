@@ -20,6 +20,19 @@
 #' @noRd
 page_fioRa_ui <- function(id) {
   ns <- shiny::NS(id)
+
+  plot_zoom_tooltip_ui <- function() {
+    bslib::tooltip(
+      trigger = shiny::span(
+        class = "d-inline-flex align-items-center gap-1",
+        shiny::span("Plot Zoom"),
+        shiny::icon("circle-question")  # Font Awesome 6 name in Shiny
+      ),
+      shiny::HTML("To zoom in:<br>(1) select a region with click and drag and <br>(2) double click to confirm.<br>To zoom out:<br>double click within plot (with no region selected)."),
+      placement = "top"
+    )
+  }
+
   shiny::tagList(
     bslib::layout_sidebar(
       padding = 0,
@@ -59,40 +72,44 @@ page_fioRa_ui <- function(id) {
       bslib::card(
         full_screen = TRUE,
         bslib::card_header(
-          class = "d-flex justify-content-between",
+          class = "d-flex justify-content-between align-items-end",
           shiny::div(style = "height: 72px; font-size: 1.25rem; padding-top: 48px;", "fioRa output"),
-          shinyjs::hidden(shiny::div(
+          shiny::div(
             id = ns("usr_opt"),
+            class = "d-flex flex-wrap align-items-start gap-3",
+            style = "max-width: 100%;",
             shiny::div(
-              style = "float: left; margin-left: 15px; width: 260px;",
-              shiny::helpText(
-                "To zoom in: select a region with click and drag and double click to confirm.",
-                "To zoom out: double click within plot but with no region selected."
-              )
-            ),
-            shiny::div(
-              style = "float: left; margin-left: 15px; width: 260px;",
+              style = "width: 260px;",
               shiny::sliderInput(
-                inputId = ns("masslab"), label = "Annotate above relative intensity of", min = 0, max = 0.25, value = 0.02, step = 0.01
+                inputId = ns("masslab"), label = NULL, min = 0, max = 0.24, value = 0.02, step = 0.01
               )
-            ),
+            ) |> bslib::tooltip("Annotate above relative intensity of...", placement = "bottom"),
             shiny::div(
-              style = "float: left; margin-left: 15px; width: 180px;",
+              style = "width: 120px;",
+              shiny::sliderInput(
+                inputId = ns("smiles_size"), label = NULL, min = 0, max = 0.5, value = 0.3, step = 0.1
+              )
+            ) |> bslib::tooltip("SMILES size (zero to omit)", placement = "bottom"),
+            shiny::div(
+              style = "width: 77px;",
               shiny::checkboxGroupInput(
-                inputId = ns("plot_opt"), label = "overlay",
-                choices = list("neutral losses"="losses", "chemical structure"="smiles"),
-                selected = c("losses", "smiles")
+                inputId = ns("plot_opt"), label = NULL,
+                choiceNames = list(shiny::tags$span(shiny::tags$span("show"), shiny::tags$span("neutral", style = "margin-left: 26px;"), shiny::tags$br(), shiny::tags$span("losses", style = "margin-left: 26px;"))),
+                choiceValues = list("losses"),
+                selected = c("losses")
               )
             ),
             shiny::div(
-              style = "float: left; margin-left: 5px; height: 38px;",
               selectInputWithButtonsUI(id = ns("current_name"))
             ),
             shiny::div(
-              style = "float: left; margin-left: 35px; margin-right: 24px; width: 60px; height: 38px;",
-              shiny::downloadButton(outputId = ns("btn_download_msp"), label = "", width = 40)
+              shiny::downloadButton(outputId = ns("btn_download_msp"), label = "msp")
+            ),
+            shiny::div(
+              class = "d-flex align-items-center",
+              plot_zoom_tooltip_ui()
             )
-          ))
+          )
         ),
         bslib::layout_sidebar(
           padding = 0,
@@ -176,7 +193,14 @@ page_fioRa_server <- function(id, fiora_script = "/home/shiny_test/miniforge3/en
 
     shiny::observeEvent(rv$fiora_finished, {
       if (!file.exists(temp_output_file)) {
-        message("Could not create output file. Check logs.")
+        message("Could not create output file. Check logs. Using default data instead...")
+        #browser()
+        fl <- system.file("extdata/annotated_output.mgf", package = "fioRa")
+        res <- fioRa::read_fiora(fl = fl)
+        rv$choices <- names(res)
+        name_choices(names(res))
+        shinyjs::show(id = "usr_opt")
+        rv$res <- res
       } else {
         res <- read_fiora(fl = temp_output_file, fmt = "list", check = TRUE, scale = as.numeric(input$par_scale))
         rv$choices <- names(res)
@@ -184,7 +208,7 @@ page_fioRa_server <- function(id, fiora_script = "/home/shiny_test/miniforge3/en
         shinyjs::show(id = "usr_opt")
         rv$res <- res
       }
-    }, ignoreInit = TRUE)
+    }, ignoreInit = FALSE)
 
     output$btn_download_msp <- shiny::downloadHandler(
       filename = function() { "fioRa_result.mgf" },
@@ -208,7 +232,7 @@ page_fioRa_server <- function(id, fiora_script = "/home/shiny_test/miniforge3/en
       #opar_mar <- graphics::par("mar")
       #on.exit(graphics::par("mar" = opar_mar), add = TRUE)
       graphics::par("mar" = c(2, 2, 0.5, 0) + 0.5)
-      plot_spec(s = rv$res[[rv$name()]][["spec"]], show_neutral_losses = "losses" %in% input$plot_opt, show_smiles = "smiles" %in% input$plot_opt, masslab = as.numeric(input$masslab), xlim = ranges$x, ylim = ranges$y)
+      plot_spec(s = rv$res[[rv$name()]][["spec"]], show_neutral_losses = "losses" %in% input$plot_opt, smiles_size = as.numeric(input$smiles_size), masslab = as.numeric(input$masslab), xlim = ranges$x, ylim = ranges$y)
     }, res = 72*1.5)
 
     # When a double-click happens, check if there's a brush on the plot.

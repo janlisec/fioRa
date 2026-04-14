@@ -1,3 +1,10 @@
+# v0.3.16 by jan.lisec@bam.de (2026-04-14)
+
+* plot_spec() can modify size of depicted chemical structures
+* plot_spec() better handles xlim and ylim when user zoomes
+* UI elements in output section are better structured
+* test data results are shown upon startup (precalculated)
+
 # v0.3.10 by jan.lisec@bam.de (2026-03-30)
 
 * plot_spec() function is now exported (it allows to overlay chemical structures
